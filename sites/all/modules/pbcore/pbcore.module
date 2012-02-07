@@ -1,0 +1,397 @@
+<?php
+
+/**
+ * @file
+ * Provide a database of PBCore values with site-wide status to be used with other modules
+ * node is added.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function pbcore_help($path, $arg) {
+  $output = '';
+  switch ($path) {
+    case "admin/help#pbcore":
+      $output = '<p>' .  t("Enable or disable PBCore elements site-wide.") . '</p>';
+      return $output;
+    case 'admin/config/pbcore':
+      $output = t('Here you can select which elements are enabled');
+      return '<p>' . t($output, array(
+        '@addanother_perm' => url('admin/user/permissions', array('fragment' => 'module-addanother')),
+      )) . '</p>';
+  }
+}
+
+
+/**
+ * Implements hook_menu().
+ */
+function pbcore_menu() {
+  $items = array();
+
+  $items['node/%node/pbcore_export.xml'] = array(
+    'title' => 'PBCore XML',
+    'description' => 'Modify items in PBCore elements are enabled.',
+    'page callback' => 'pbcore_render_xml',
+    'page arguments' => array(1),
+    'access callback' => 'pbcore_render_xml_access',
+    'access arguments' => array(1),
+    'type' => MENU_CALLBACK,
+  );
+
+  /*
+   $items['pbcore/status/%/%/%'] = array(
+   'title' => ('PBCore Enable/Disable'),
+   'description' => ('Enable or Disable a PBCore term'),
+   'page_callback' => 'pbcore_enable_disable',
+   'access arguments' => array('administer pbcore'),
+   'page_arguments' => array(3,4,5),
+   'type' => MENU_CALLBACK,
+   );
+   */
+  return $items;
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_enable_disable($op, $tid, $vid) {
+
+  switch ($op) {
+    case 'enable':
+      pbcore_set_term_status($tid, 1);
+      drupal_set_message($tid . " Enabled");
+      break;
+    case 'disable':
+      pbcore_set_term_status($tid, 0);
+      drupal_set_message($tid . " Disabled");
+      break;
+  }
+
+  $vocabulary = taxonomy_vocabulary_load($vid);
+  return drupal_get_form('taxonomy_overview_terms', (array) $vocabulary);
+}
+
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_render_xml_access($node) {
+
+  return TRUE;
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_render_xml($node) {
+
+  $terms = taxonomy_node_get_terms($node);
+
+  $genre_vid = variable_get('pbcore_genres_vid', 0);
+  $fccratings_vid = variable_get('pbcore_fccratings_vid', 0);
+  $mpaaratings_vid = variable_get('pbcore_mpaaratings_vid', 0);
+  $languages_vid = variable_get('pbcore_languages_vid', 0);
+
+  $output .= "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+  $output .= "<PBCoreDescriptionDocument xmlns=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html\"
+ xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+ xsi:schemaLocation=\"http://www.pbcore.org/PBCore/PBCoreNamespace.html http://www.pbcore.org/PBCore/PBCoreSchema.xsd\">\n";
+
+  $output .= " <pbcoreIdentifier>\n";
+  $output .= "   <identifier>" . $node->title . "</identifier>\n";
+  $output .= "   <identifierSource>" . variable_get('site_name', '') . "</identifierSource>\n";
+  $output .= " </pbcoreIdentifier>\n";
+
+  $output .= "  <pbcoreTitle>\n";
+  $output .= "    <title>" . $node->title . "</title>\n";
+
+  $output .= "    <titleType>Clip</titleType>\n";
+  $output .= "  </pbcoreTitle>\n";
+
+  if (module_exists('om_project')) {
+    $output .= "  <pbcoreTitle>\n";
+    $output .= "    <title>" . $node->og . "</title>\n";
+    $output .= "    <titleType>Project</titleType>\n";
+    $output .= "  </pbcoreTitle>\n";
+  }
+
+  $output .= "  <pbcoreDescription>\n";
+  $output .= "    <description>" . $node->body . "</description>\n";
+  $output .= "    <descriptionType>Abstract</descriptionType>\n";
+  $output .= "  </pbcoreDescription>\n";
+
+
+  $genres = taxonomy_node_get_terms_by_vocabulary($node, $genre_vid);
+  foreach ($genres as $genre) {
+    // TODO The taxonomy synonym functionality has been removed.
+    // To replace this functionality, you can add a synonym field to your vocabulary.
+    $genre_synonyms = array() /*taxonomy_get_synonyms($genre->tid)*/;
+    if (empty($genre_synonyms)) {
+      continue;
+    }
+    $output .= "  <pbcoreGenre>\n";
+    $output .= "    <genre>" . $genre_synonyms[0] . "</genre>\n";
+    $output .= "    <genreAuthorityUsed>PBMD Project</genreAuthorityUsed>\n";
+    $output .= "  </pbcoreGenre>\n";
+  }
+  $ratings = taxonomy_node_get_terms_by_vocabulary($node, $fccratings_vid);
+  foreach ($ratings as $rating) {
+    // TODO The taxonomy synonym functionality has been removed.
+    // To replace this functionality, you can add a synonym field to your vocabulary.
+    $rating_synonyms = array() /*taxonomy_get_synonyms($rating->tid)*/;
+    if (empty($rating_synonyms)) {
+      continue;
+    }
+    $output .= "  <pbcoreAudienceRating>\n";
+    $output .= "    <audienceRating>" . $rating_synonyms[0] . "</audienceRating>\n";
+    $output .= "  </pbcoreAudienceRating>\n";
+  }
+  $ratings = taxonomy_node_get_terms_by_vocabulary($node, $mpaaratings_vid);
+  foreach ($ratings as $rating) {
+    // TODO The taxonomy synonym functionality has been removed.
+    // To replace this functionality, you can add a synonym field to your vocabulary.
+    $rating_synonyms = array() /*taxonomy_get_synonyms($rating->tid)*/;
+    if (empty($rating_synonyms)) {
+      continue;
+    }
+    $output .= "  <pbcoreAudienceRating>\n";
+    $output .= "    <audienceRating>" . $rating_synonyms[0] . "</audienceRating>\n";
+    $output .= "  </pbcoreAudienceRating>\n";
+  }
+
+  $languages = taxonomy_node_get_terms_by_vocabulary($node, $languages_vid);
+  foreach ($languages as $language) {
+    // TODO The taxonomy synonym functionality has been removed.
+    // To replace this functionality, you can add a synonym field to your vocabulary.
+    $language_synonyms = array() /*taxonomy_get_synonyms($language->tid)*/;
+    if (empty($language_synonyms)) {
+      continue;
+    }
+    $language = $language_synonyms[0];
+  }
+
+  $output .= " <pbcoreInstantiation>\n";
+  if ($language) {
+    $output .= "  <language>" . $language . "</language>\n";
+  }
+  $output .= "  <dateCreated>" . $node->published . "</dateCreated>";
+  //TODO etc.
+  $output .= " </pbcoreInstantiation>\n";
+
+
+  $output .= "</PBCoreDescriptionDocument>\n";
+
+  header("Content-type: text/xml");
+  print $output;
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_get_term_status($tid) {
+  static $active_tids;
+
+  if (!isset($active_tids)) {
+    $result = db_query("SELECT tid FROM {pbcore_defaults} WHERE status = :status", array(':status' => 1));
+    $active_tids = array();
+    while ($tid = $result->fetchField()) {
+      $active_tids[] = $tid;
+    }
+  }
+
+  return in_array($tid, $active_tids);
+}
+
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_is_my_vocabulary($vid) {
+
+  $pbcore_vocabulary_names = array('pbcore_genres_vid', 'pbcore_fccratings_vid', 'pbcore_mpaaratings_vid', 'pbcore_languages_vid');
+
+  foreach ($pbcore_vocabulary_names as $pbcore_vocabulary_name) {
+    if ($vid == variable_get($pbcore_vocabulary_name, 0)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/*
+
+function pbcore_form_taxonomy_overview_terms_alter(&$form, $form_state) {
+
+  $vid = $form['#vocabulary']['vid'];
+
+  if (!pbcore_is_my_vocabulary($vid)) {
+    return;
+  }
+
+  $statuses = db_query("SELECT * FROM {pbcore_defaults}");
+
+  $defaults = array();
+  while ($status = db_fetch_array($statuses)) {
+    if ($status['status']) {
+      $defaults[$status['tid']] = $status['status'];
+    }
+  }
+
+  foreach (element_children($form) as $key) {
+    if (array_key_exists($form[$key]['#term']['tid'], $defaults)) {
+      //$form[$key]['edit']['#value'] .= ' '.l('disable','admin/config/pbcore/status/disable/'.$form[$key]['#term']['tid'].'/'.$form['#vocabulary']['vid']);
+      $form[$key]['view']['#value'] .= ' enabled';
+    }
+    else if (is_array($form[$key]['#term'])) {
+      //$form[$key]['edit']['#value'] .= ' '.l('enable','admin/config/pbcore/status/enable/'.$form[$key]['#term']['tid'].'/'.$form['#vocabulary']['vid']);
+    }
+  }
+  //drupal_set_message(print_r($form,true));
+}
+*/
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+/*
+
+function pbcore_form_taxonomy_form_term_alter(&$form, $form_state) {
+  dsm($from);
+  //$vid = $form['#vocabulary']['vid'];
+
+  if (!pbcore_is_my_vocabulary($vid)) {
+    return;
+  }
+
+  $form['identification']['status'] = array(
+    '#title' => "Enabled",
+    '#type' => "checkbox",
+    '#default_value' => $form_state['identification']['status'] ? $form_state['identification']['status'] : pbcore_get_term_status($form['#term']['tid']),
+  );
+
+  $form['advanced']['synonyms']['#disabled'] = TRUE;
+  $form['delete']['#disabled'] = TRUE;
+
+
+  $form['#submit'][] = 'pbcore_form_taxonomy_form_term_submit';
+  drupal_set_message(print_r($form, true));
+}
+*/
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+/*
+
+function pbcore_form_taxonomy_form_term_submit($form, &$form_state) {
+  if ($form['identification']['status']['#value'] != $form['identification']['status']['#default_value']) {
+    pbcore_set_term_status($form['#term']['tid'], $form['identification']['status']['#value']);
+  }
+}
+
+*/
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_set_term_status($tid, $status) {
+  if (!$tid) {
+    return;
+  }
+  if (db_query("SELECT tid FROM {pbcore_defaults} WHERE tid = :tid", array(':tid' => $tid))->fetchField()) {
+    // TODO Please review the conversion of this statement to the D7 database API syntax.
+    /* db_query("UPDATE {pbcore_defaults} SET status = %d WHERE tid = %d", $status, $tid) */
+    db_update('pbcore_defaults')
+  ->fields(array(
+      'status' => $status,
+    ))
+  ->condition('tid', $tid)
+  ->execute();
+  }
+  else {
+    // TODO Please convert this statement to the D7 database API syntax.
+    /* db_query("INSERT INTO {pbcore_defaults} VALUES(%d,%d)", $tid, $status) */
+    NULL;
+  }
+}
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_form_alter(&$form, $form_state, $form_id) {
+  // This is the node add / edit form. If a different selector is used from
+  // another contributed module, we do nothing so as to not break the form.
+  if (isset($form['type']) && isset($form['#node']) && isset($form['taxonomy']) && (!variable_get('taxonomy_override_selector', FALSE)) && $form['type']['#value'] . '_node_form' == $form_id) {
+    $terms = taxonomy_node_get_terms($form['#node']);
+    foreach ($form['taxonomy'] as $vid => $vocabulary) {
+
+      if (!pbcore_is_my_vocabulary($vid)) {
+        continue;
+      }
+
+      if (!is_array($vocabulary) || !isset($vocabulary['#options'])) {
+        continue;
+      }
+
+      $total_terms = count($vocabulary['#options']) - 1;
+
+      foreach ($vocabulary['#options'] as $terms) {
+        if (!isset($terms->option)) {
+          continue;
+        }
+        foreach ($terms->option as $tid => $term) {
+          // Now we have the term ID, check to see if the current user has
+          // access to the term.
+          if (!pbcore_get_term_status($tid)) {
+            $total_terms--;
+            unset($terms->option[$tid]);
+          }
+          // If the user doesn't have access to any of the terms in the
+          // vocabulary, remove the form item entirely.
+          if ($total_terms <= 0) {
+            if ($vocabulary['#required']) {
+              drupal_set_message(t("Your account doesn't have permission to use any of the terms in the %vocabulary vocabulary. Your account must be given permission to use at least one term in the %vocabulary vocabulary to be able to add or edit the %content-type content type.", array('%vocabulary' => $vocabulary['#title'], '%content-type' => node_type_get_name($form['type']['#value']))), 'warning');
+              watchdog('term_permissions', '%user was blocked from accessing the %content-type form as they do not have permission to use any terms in the <a href="@vocabulary-url">%vocabulary</a> vocabulary.', array('%user' => isset($user->name) ? $user->name : variable_get('anonymous', 'Anonymous'), '%content-type' => node_type_get_name($form['type']['#value']), '@vocabulary-url' => url('admin/structure/taxonomy/' . $vid), '%vocabulary' => $vocabulary['#title']), WATCHDOG_WARNING, l(t('edit vocabulary'), 'admin/structure/taxonomy/' . $vid));
+              drupal_access_denied();
+              exit();
+            }
+            unset($form['taxonomy'][$vid]);
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_get_languages($format, $status = 'active') { }
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_get_genres($format, $status = 'active') { }
+/**
+ * @todo Please document this function.
+ * @see http://drupal.org/node/1354
+ */
+function pbcore_get_ratings($format, $status = 'active') { }
+
+function pbcore_status(){
+  return 'Installed, but not configured. This modules created a larger number of  genres, ratings, and languages. This module enables you to limit that list to terms that more likely used by your producer community. There is no reason to overwhelm producers with a list of 481 languages when your station only airs content in 3 or 4.  Limit the PBCore lists before enabling Project or Show.';
+}

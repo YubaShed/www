@@ -1,0 +1,227 @@
+<?php
+/**
+ * @file
+ * A module that displays data from the RiMDB database.
+ */
+
+/**
+ * Implements hook_help
+ * 
+ * Displays help info
+ * 
+ * @param $path
+ * The path of the site that we're using to display help
+ * @param $arg
+ * Array that holds the current path as returned from the arg() function
+ */
+function watershed_help($path, $arg) {
+	switch ($path) {
+		case "admin/help#rimdb":
+			return '<p>'.  t("Watershed info display system") .'</p>';
+			break;
+	}
+}
+
+/**
+ * Implements hook_block_info
+ * 
+ * @return multitype:string NULL
+ */
+function watershed_block_info() {
+	$blocks['watershed'] = array(
+			'info' => t('Watershed Block'), //The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_PER_PAGE, //Changes depending on the current page
+	);
+	return $blocks;
+}
+
+/**
+ * Custom content function.
+ *
+ * Set beginning and end dates, retrieve posts from database
+ * saved in that time period.
+ *
+ * @return
+ *   A result set of the targeted posts.
+ */
+function watershed_block_contents($display){
+	//Get today's date.
+	$today = getdate();
+	//Calculate the date a week ago.
+	$start_time = mktime(0, 0, 0,$today['mon'],($today['mday'] - 7), $today['year']);
+	//Get all posts from one week ago to the present.
+	$end_time = time();
+	
+	$max_num = variable_get('watershed_posts_max', 3);
+	
+	//Use Database API to retrieve current posts.
+	$query = db_select('node', 'n')
+	->fields('n', array('nid', 'title', 'created'))
+	->condition('status', 1) //Published.
+	->condition('created', array($start_time, $end_time), 'BETWEEN')
+	->orderBy('created', 'DESC'); //Most recent first.
+  
+  if($display == 'block') {
+    // Restrict the range if called with 'block' argument.
+  	$query->range(0, $max_num);
+  }
+	
+	return $query->execute();
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * Prepares the contents of the block.
+ */
+function watershed_block_view($delta = '') {
+	switch($delta){
+		case 'watershed':
+			$block['subject'] = t('Watershed Block');
+			
+			if(user_access('access content')){
+				//Use our custom function to retrieve data.
+				$result = watershed_block_contents('block');
+				//Array to contain items for the block to render.
+				$items = array();
+				//Iterate over the resultset and format as links.
+				foreach ($result as $node){
+					$items[] = array(
+							'data' => l($node->title, 'node/' . $node->nid),
+					);
+				}
+
+				if (empty($items)) { //No content in the last week.
+					$block['content'] = t('No posts available.');
+				}
+// 				else {
+// 					//Pass data through theme function.
+// 					$block['content'] = theme('item_list', array(
+// 							'items' => $items));
+// 				}
+				else {
+					//Pass data through theme function.
+					$block['content']['posts'] = array(
+				    '#theme' => 'item_list__watershed_posts__block',
+				    '#items' => $items,
+					);
+					//Add a link to the page for more entries.
+					$block['content']['more'] = array(
+					    '#theme' => 'more_link__watershed_posts',
+					    '#url' => 'watershed_posts',
+					    '#title' => t('See the full list of rimdb posts.'),
+					);
+				}
+			} // end if(user_access(...))
+			
+		return $block;
+	}
+}
+
+/**
+ * Implements hook_menu().
+ */
+function rimdb_menu() {
+	$items = array();
+
+	$items['admin/config/content/watershed'] = array(
+			'title' => 'Watershed Info Config',
+			'description' => 'Configuration for the Watershed Info module',
+			'page callback' => 'drupal_get_form',
+			'page arguments' => array('watershed_form'),
+			'access arguments' => array('access administration pages'),
+			'type' => MENU_NORMAL_ITEM,
+	);
+	
+	$items['watershed_posts'] = array(
+			'title' => 'Watershed posts',
+			'page callback' => '_watershed_posts_page',
+			'access arguments' => array('access watershed content'),
+			//'type' => MENU_NORMAL_ITEM, //Will appear in Navigation menu.
+			'type' => MENU_CALLBACK, // will not appear in Nav menu, but has a path and attributes
+	);
+
+	return $items;
+}
+
+/**
+ * Form function, called by drupal_get_form()
+ * in rimdb_menu().
+ */
+function watershed_form($form, &$form_state) {
+	$form['watershed_posts_max'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Maximum number of posts'),
+			'#default_value' => variable_get('watershed_posts_max', 3),
+			'#size' => 2,
+			'#maxlength' => 2,
+			'#description' => t('The maximum number of links to display in the block.'),
+			'#required' => TRUE,
+	);
+
+	return system_settings_form($form);
+}
+
+/**
+ * Implements validation from the Form API.
+ *
+ * @param $form
+ *   A structured array containing the elements and properties of the form.
+ * @param $form_state
+ *   An array that stores information about the form's current state
+ *   during processing. See drupal_build_form() for a list of $form_state keys.
+ */
+function watershed_form_validate($form, &$form_state){
+	$max_num = $form_state['values']['watershed_posts_max'];
+	if (!is_numeric($max_num)){
+		form_set_error('watershed_posts_max', t('You must enter an integer for the maximum number of posts to display.'));
+	}
+	else if ($max_num <= 0){
+		form_set_error('watershed_posts_max', t('Maximum number of posts to display must be positive.'));
+	}
+}
+
+/**
+ * Implements hook_permission().
+ */
+function watershed_permission(){
+	return array(
+			'access watershed content' => array(
+					'title' => t('Access content for the Watershed module'),
+			)
+	);
+}
+
+/**
+ * Custom page callback function, declared in rimdb_menu().
+ */
+function _watershed_posts_page() {
+	$result = watershed_block_contents('page');
+	//Array to contain items for the page to render.
+	$items = array();
+	//Iterate over the resultset and format as links.
+	foreach ($result as $node) {
+		$items[] = array(
+				'data' => l($node->title, 'node/' . $node->nid),
+		);
+	}
+	
+	if (empty($items)) { //No content in the last week.
+		$page_array['watershed_posts_arguments'] = array(
+		//Title serves as page subtitle
+				'#title' => t('All posts from the last week'),
+				'#markup' => t('No posts available.'),
+		);
+		return $page_array;
+	}
+	else {
+		$page_array['watershed_posts_arguments'] = array(
+				'#title' => t('All posts from the last week'),
+				'#items' => $items,
+				//Theme hook with suggestion.
+				'#theme' => 'item_list__watershed_posts',
+		);
+		return $page_array;
+	}
+}
+

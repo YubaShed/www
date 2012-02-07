@@ -1,0 +1,73 @@
+<?php
+/**
+ * @file
+ */
+
+
+function pbcore_custom_names_form_alter(&$form, $form_state, $form_id) {
+
+  if ($form_id == 'cm_project_node_form' || $form_id == 'cm_show_node_form') {
+
+    //Genres   
+    $newoptions = array();
+    $options = $form['field_pbcore_genres'][LANGUAGE_NONE]['#options'];
+  
+    foreach ($options as $key => $option) {
+    
+      if ($key == '_none') {
+        $newoptions[$key] = $option;
+      }
+
+      $term = taxonomy_term_load($key);
+      
+      if($term->field_term_enable) {
+        $name =  isset($term->field_pbcore_custom_name[LANGUAGE_NONE][0]['value']) ? $term->field_pbcore_custom_name[LANGUAGE_NONE][0]['value'] : $option;
+        $newoptions[$key] = $name ;
+      }
+    }
+    
+    $form['field_pbcore_genres'][LANGUAGE_NONE]['#options'] = $newoptions;
+    
+    //Languages
+    $newoptions = array();
+    $options = $form['field_pbcore_languages'][LANGUAGE_NONE]['#options'];
+  
+    foreach ($options as $key => $option) {
+      
+      if ($key == '_none') {
+        $newoptions[$key] = $option;
+      }
+
+      $term = taxonomy_term_load($key);
+      
+      if($term->field_term_enable) {
+        $name =  isset($term->field_pbcore_custom_name[LANGUAGE_NONE][0]['value']) ? $term->field_pbcore_custom_name[LANGUAGE_NONE][0]['value'] : $option;
+        $newoptions[$key] = $name ;
+      }
+    }
+    
+    $form['field_pbcore_languages'][LANGUAGE_NONE]['#options'] = $newoptions;
+    
+    //Ratings
+    $newoptions = array();
+    $options = $form['field_pbcore_fcc_ratings'][LANGUAGE_NONE]['#options'];
+    
+    foreach ($options as $key => $option) {
+    
+      if ($key == '_none') {
+        $newoptions[$key] = $option;
+      }
+
+      $term = taxonomy_term_load($key);
+      
+      if($term->field_term_enable) {
+        $name =  isset($term->field_pbcore_custom_name[LANGUAGE_NONE][0]['value']) ? $term->field_pbcore_custom_name[LANGUAGE_NONE][0]['value'] : $option;
+        $newoptions[$key] = $name ;
+      }
+    }
+    
+    $form['field_pbcore_fcc_ratings'][LANGUAGE_NONE]['#options'] = $newoptions;
+    
+  }
+
+}
