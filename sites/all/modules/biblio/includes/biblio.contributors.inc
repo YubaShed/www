@@ -158,11 +158,10 @@ function biblio_delete_contributor($cid) {
 
 }
 function biblio_delete_contributor_revision($cid, $vid) {
-  return db_delete('biblio_contributor')
+       return db_delete('biblio_contributor')
           ->condition('cid', $cid)
           ->condition('vid', $vid)
           ->execute();
-
 }
 
 function biblio_count_orphan_authors() {
@@ -287,10 +286,11 @@ function _save_contributors(&$contributors, $nid, $vid, $update = FALSE) {
       }
    // }
   }
+//print_r($contributors);
   //TODO  check if it is necessary to reset aka here...
   //  db_query("UPDATE {biblio_contributor_data} SET aka = cid WHERE aka = 0 OR aka IS NULL");
   //  db_update('biblio_contributor_data')
-  //    ->fields(array('aka', )
+  //    ->fields(array('aka' );
   return TRUE; // successfully saved all contributors
 }
 /*
