@@ -175,9 +175,13 @@ function watershed_test_form($form, &$form_state) {
 	// 		  '#type' => 'checkbox',
 	// 		  '#title' => t('Line Series: Parameter x Site x All Months'),
 	// 	);
+	$form['import_xml'] = array(
+	  '#type' => 'checkbox', 	
+	  '#title' => t('Import XML into Database'),
+	);
 	$form['line_param_regionsites_alltime'] = array(
 	  '#type' => 'checkbox', 	
-	  '#title' => t('Line Series: Parameter x Sites in Region x All Months'),
+	  '#title' => t('Time Series: Parameter x Sites in Region x All Months'),
 	);
 	// 	$form['line_param_allsites_alltime'] = array(
 	// 	  '#type' => 'checkbox',
@@ -258,7 +262,7 @@ function watershed_test_form_submit($form, &$form_state){
 	  'title' => t('Importing Data'),
     'init_message' => t('Data import is starting.'),
 		'operations' => array(
-	//array('load_xml', array($autogen)),
+		//array('load_xml', array($autogen)),
 	),
 	  'finished' => 'autogen_finished_callback',
 	//'progress_message' => t('Processed @current out of @total.'),
@@ -276,6 +280,9 @@ function watershed_test_form_submit($form, &$form_state){
 	// 	if($form_state['values']['line_param_site_alltime']){
 	// 		$batch['operations'][] = array('autogen_line_param_site_alltime', array($autogen));
 	// 	}
+       if($form_state['values']['import_xml']){
+                $batch['operations'][] = array('load_xml', array($autogen));
+        }
 	if($form_state['values']['line_param_regionsites_alltime']){
 		$batch['operations'][] = array('autogen_line_param_regionsites_alltime', array($autogen));
 	}
@@ -582,9 +589,9 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 	$path = libraries_get_path($libname);
 	// Do something with the library, knowing the path, for instance:
 	// drupal_add_js($path . '/example.js');
-	include($path ."/lib/GoogleChart.php");
-	include($path ."/lib/markers/GoogleChartShapeMarker.php");
-	include($path ."/lib/markers/GoogleChartTextMarker.php");
+	require($path ."/lib/GoogleChart.php");
+	require($path ."/lib/markers/GoogleChartShapeMarker.php");
+	require($path ."/lib/markers/GoogleChartTextMarker.php");
 
 
 	$lang = $autogen->language;
@@ -905,7 +912,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 			$data = $chart->getImage();
 			//echo '<img src="'. _embed($data , "image/png") .'" alt=""/>';
 			$dir = "public://charts";
-			file_prepare_directory(&$dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+			file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
 			$tag = "time_{$region}_{$parameter}";
 			$filename = "{$tag}.png";
 			$file = file_save_data($data, "public://charts/{$filename}",FILE_EXISTS_REPLACE );
