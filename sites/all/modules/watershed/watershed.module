@@ -791,9 +791,10 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 
 			$chart = new GoogleChart('lc', 900, 333);
 			$chart->setQueryMethod(GoogleChart::POST);
-			$chart->setTitle("{$parameter} x {$region}");
+			//$chart->setTitle("{$parameter} x {$region}");
 
 			$chart->setAutoscale(true);
+			$chart->setLegendPosition('b');
 			//$chart->setScale($paramValMin,$paramValMax);
 
 			//echo "<br/>regMin: {$paramValMin} regMax: {$paramValMax} <br/>";
@@ -917,6 +918,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 			$tag = "time_{$region}_{$parameter}";
 			$filename = "{$tag}.png";
 			$file = file_save_data($data, "public://charts/{$filename}",FILE_EXISTS_REPLACE );
+			image_path_flush("public://charts/{$filename}");
 
 			//print_r();
 			//break;
