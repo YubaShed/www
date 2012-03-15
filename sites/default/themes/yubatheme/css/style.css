@@ -106,7 +106,10 @@ body,
 #site-slogan,
 .ui-widget,
 .comment-form label {
+font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, sans-serif;
+/*
   font-family: Georgia, "Times New Roman", Times, serif;
+  */
 }
 #header,
 #footer-wrapper,
