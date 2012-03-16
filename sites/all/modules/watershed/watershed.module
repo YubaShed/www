@@ -271,7 +271,7 @@ function watershed_test_form_validate($form, &$form_state){
 		$found = false;
 		foreach($orgs as $nid => $title){
 		//$site->field_ref_organization[$lang][0]['nid'] = 
-			if(strpos($title, $s->title) !== false){
+			if(stripos($s->title, $title) !== false){
 				$site->field_ref_organization[$lang][0]['nid'] = $nid;
 				$found = true;
 			}
