@@ -57,7 +57,7 @@ class geofield_map_plugin_style_map extends views_plugin_style {
       $popup_source_options[$handle->options['id']] = (!empty($handle->options['label'])) ? $handle->options['label'] : $handle->options['id'];
 
       if (!empty($handle->field_info['type']) && $handle->field_info['type'] == 'geofield') {
-        $data_source_options[$handle->options['id']] = $handle->options['label'];
+        $data_source_options[$handle->options['id']] = (!empty($handle->options['label'])) ? $handle->options['label'] : $handle->options['id'];
       }
     }
 
@@ -114,7 +114,7 @@ class geofield_map_plugin_style_map extends views_plugin_style {
 
         if (!empty($geofield)) {
           $description = ($popup_data ? $this->rendered_fields[$id][$popup_data] : '');
-          $geometry = geoPHP::load($geofield[0]['rendered']['#markup'], 'wkt');
+          $geometry = geoPHP::load($geofield[0]['raw']['wkt'], 'wkt');
           $datum = json_decode($geometry->out('json'));
           $datum->properties = array(
             'description' => $description,
@@ -125,7 +125,8 @@ class geofield_map_plugin_style_map extends views_plugin_style {
 
       if (count($data) == 1) {
         $data = $data[0];
-      } else if (count($data) > 1) {
+      } 
+      elseif (count($data) > 1) {
         $tmp = $data;
         $data = array(
           'type' => 'GeometryCollection',

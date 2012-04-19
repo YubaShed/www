@@ -6,9 +6,9 @@ files[] = feed_import.inc.php
 files[] = feed_import_filter.inc.php
 configure = admin/config/services/feed_import
 
-; Information added by drupal.org packaging script on 2012-01-23
-version = "7.x-2.5"
+; Information added by drupal.org packaging script on 2012-03-01
+version = "7.x-2.6"
 core = "7.x"
 project = "feed_import"
-datestamp = "1327344941"
+datestamp = "1330617044"
 

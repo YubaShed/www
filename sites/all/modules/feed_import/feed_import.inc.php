@@ -133,20 +133,20 @@ class FeedImport {
       }
       $fields = entity_get_info();
       foreach ($fields as $key => &$field) {
+        if (empty($field['schema_fields_sql']['base table']) || !is_array($field['schema_fields_sql']['base table']) || empty($field['entity keys']['id'])) {
+          unset($fields[$key]);
+          continue;
+        }
         $field = array(
           'name' => $key,
           'column' => $field['entity keys']['id'],
           'columns' => $field['schema_fields_sql']['base table'],
         );
-        $field['columns'] = array_flip($field['columns']);
-        foreach ($field['columns'] as &$f) {
-          $f = NULL;
-        }
+        $field['columns'] = array_combine($field['columns'], array_fill(0, count($field['columns']), NULL));
         foreach ($info as &$f) {
-          if (!in_array($key, $f['bundles'])) {
-            continue;
+          if (in_array($key, $f['bundles'])) {
+            $field['columns'][$f['name']] = $f['column'];
           }
-          $field['columns'][$f['name']] = $f['column'];
         }
       }
       unset($info);
@@ -258,7 +258,10 @@ class FeedImport {
       self::$generatedHashes = array();
 
       // Give import time (for large imports).
-      set_time_limit(0);
+      // Well, if safe mode is on this cannot be done so it may break import.
+      if (!ini_get('safe_mode')) {
+        set_time_limit(0);
+      }
       // Call process function to get processed items.
       $items = call_user_func($func, $feed);
       // Parse report.
@@ -406,13 +409,15 @@ class FeedImport {
     }
     if (count($xpath) == 1) {
       $xpath = (array) reset($xpath);
-      if (isset($xpath['@attributes']) && count($xpath) > 1) {
+      $count = count($xpath);
+      if (isset($xpath['@attributes']) && $count > 1) {
         unset($xpath['@attributes']);
+        $count--;
       }
       // Convert to array.
-      $xpath = self::SimpleXmlToArray(reset($xpath));
-      if (count($xpath) == 1) {
-        $xpath = isset($xpath[0]) ? $xpath[0] : reset($xpath);
+      $xpath = self::SimpleXmlToArray($xpath);
+      if ($count == 1) {
+        $xpath = reset($xpath);
       }
     }
     else {
@@ -420,11 +425,13 @@ class FeedImport {
       foreach ($xpath as $key => &$x) {
         // Convert to array.
         $x = self::SimpleXmlToArray($x);
-        if (isset($x['@attributes']) && count($x) > 1) {
+        $count = count($x);
+        if (isset($x['@attributes']) && $count > 1) {
           unset($x['@attributes']);
+          $count--;
         }
-        if (count($x) == 1) {
-          $x = isset($x[0]) ? $x[0] : reset($x);
+        if ($count == 1) {
+          $x = reset($x);
         }
         if (empty($x)) {
           unset($xpath[$key], $x);
@@ -1087,6 +1094,13 @@ class FeedImport {
     $chunk_length = $feed['xpath']['#settings']['chunk_size'];
     // Items count.
     $items_count = $feed['xpath']['#settings']['items_count'];
+    // Substring function.
+    if (empty($feed['xpath']['#settings']['substr_function'])) {
+      $substr = 'substr';
+    }
+    else {
+      $substr = $feed['xpath']['#settings']['substr_function'];
+    }
     $current = 0;
     // Open xml url.
     try {
@@ -1121,7 +1135,7 @@ class FeedImport {
           break;
         }
         elseif ($content[$openposclose] != ' ' && $content[$openposclose] != '>') {
-          $content = substr($content, $openposclose);
+          $content = $substr($content, $openposclose);
           continue;
         }
         $closepos = strpos($content, $tag['close'], $openposclose);
@@ -1132,9 +1146,9 @@ class FeedImport {
         $closepos += $tag['closelength'];
 
         // Create xml string.
-        $item = $xml_head . substr($content, $openpos, $closepos - $openpos);
+        $item = $xml_head . $substr($content, $openpos, $closepos - $openpos);
         // New content.
-        $content = substr($content, $closepos - 1);
+        $content = $substr($content, $closepos - 1);
         // Create xml object.
         try {
           $item = simplexml_load_string($item, self::$simpleXMLElement, LIBXML_NOCDATA);
@@ -1198,6 +1212,11 @@ class FeedImport {
       case 'chunk_size':
         $value = (int) $value;
         if ($value <= 0) {
+          return $default;
+        }
+        break;
+      case 'substr_function':
+        if (!in_array($value, array('substr', 'mb_substr', 'drupal_substr'))) {
           return $default;
         }
         break;
