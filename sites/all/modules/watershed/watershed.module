@@ -175,24 +175,25 @@ function watershed_test_form($form, &$form_state) {
 	// 		  '#type' => 'checkbox',
 	// 		  '#title' => t('Line Series: Parameter x Site x All Months'),
 	// 	);
-	$form['update_sites'] = array(
-		  '#type' => 'checkbox', 	
-		  '#title' => t('Update Sites'),
-	);
+// 	$form['update_site_orgref'] = array(
+// 		  '#type' => 'checkbox', 	
+// 		  '#title' => t('Update Sites Organization reference'),
+// 	);
+	
 	
 	$form['import_xml'] = array(
 	  '#type' => 'checkbox', 	
-	  '#title' => t('Import XML into Database'),
+	  '#title' => t('Import XML into database (required data format: <DATA><ROW><Date/><Site/><Parameter/><Replicates/><Result/><ResQualCode/></ROW></DATA>'),
 	);
-	
-	$form['paramcols_line_param_regions_alltime'] = array(
-	  '#type' => 'checkbox',
-	  '#title' => t('Time Series: Parameter x StationCat x Month from multiple parameter columns'),
+
+	$form['import_csv_paramcols'] = array(
+		  '#type' => 'checkbox', 	
+		  '#title' => t('Import CSV w/ multiple parameters as columns into database (required column format: Date, Site, Param1, Param2, etc)'),
 	);
 	
 	$form['line_param_regionsites_alltime'] = array(
 	  '#type' => 'checkbox', 	
-	  '#title' => t('Time Series: Parameter x StationCat x Month from a single (mixed) parameter column'),
+	  '#title' => t('Generate time series charts from imported data: Parameter x StationCat x Month from a single (mixed) parameter column'),
 	);
 
 	// 	$form['line_param_allsites_alltime'] = array(
@@ -249,43 +250,16 @@ function _embed($contents, $mime) {
 function watershed_test_form_validate($form, &$form_state){
 
 	if ( arg(0) == 'node' && is_numeric(arg(1)) && ! arg(2) ) {
-		$autogen = node_load(arg(1));
+		//$autogen = node_load(arg(1));
 		// Do something with $node
 		//print_r( $node );
-		$lang = $autogen->language;
 		
 	} else
 	form_set_error('watershed_test_form', t('Unable to recognize the node ID'));
 
-	$q1 = 'select nid, title FROM node where type = "watershed_organization"';
-	$os = db_query($q1);
-	$orgs = array();
-	foreach($os as $o) {
-		$orgs[$o->nid] = $o->title;
-	}
-	
-	$q = 'select nid, title from node where type = "watershed_site"';
-	$ss = db_query($q);
-	foreach($ss as $s) {
-		$site = node_load($s->nid);
-		$found = false;
-		foreach($orgs as $nid => $title){
-		//$site->field_ref_organization[$lang][0]['nid'] = 
-			if(stripos($s->title, $title) !== false){
-				$site->field_ref_organization[$lang][0]['nid'] = $nid;
-				$found = true;
-			}
-		}
-		if(!$found) {
-			$keys = array_keys($orgs);
-			$site->field_ref_organization[$lang][0]['nid'] = $keys[0];
-		}
-		$site = node_submit($site); // Prepare node for a submit
-		node_save($site);
-	}
-	
 
-	form_set_error('watershed_test_form', t('Fake error'));
+
+	//form_set_error('watershed_test_form', t('Fake error'));
 }
 
 
@@ -322,13 +296,16 @@ function watershed_test_form_submit($form, &$form_state){
 	// 		$batch['operations'][] = array('autogen_line_param_site_alltime', array($autogen));
 	// 	}
 	
+	if($form_state['values']['update_site_orgref']){
+		$batch['operations'][] = array('update_site_orgref', array($autogen));
+	}
 	
        if($form_state['values']['import_xml']){
                 $batch['operations'][] = array('load_xml', array($autogen));
         }
         
-        if($form_state['values']['paramcols_line_param_regions_alltime']){
-        	$batch['operations'][] = array('autogen_line_param_stationcat_month_paramcols', array($autogen));
+        if($form_state['values']['import_csv_paramcols']){
+        	$batch['operations'][] = array('import_csv_paramcols', array($autogen));
         }
         
         
@@ -399,6 +376,128 @@ function watershed_test_form_submit($form, &$form_state){
  *   1 (or no value explicitly set) means the operation is finished
  *   and the batch processing can continue to the next operation.
  */
+
+function update_site_orgref($autogen, &$context){
+	$lang = $autogen->language;
+	$q1 = 'select nid, title FROM node where type = "watershed_organization"';
+	$os = db_query($q1);
+	$orgs = array();
+	foreach($os as $o) {
+		$orgs[$o->nid] = $o->title;
+	}
+	
+	$q = 'select nid, title from node where type = "watershed_site"';
+	$ss = db_query($q);
+	foreach($ss as $s) {
+		$site = node_load($s->nid);
+		$found = false;
+		foreach($orgs as $nid => $title){
+			//$site->field_ref_organization[$lang][0]['nid'] =
+			if(stripos($s->title, $title) !== false){
+				$site->field_ref_organization[$lang][0]['nid'] = $nid;
+				$found = true;
+			}
+		}
+		if(!$found) {
+			$keys = array_keys($orgs);
+			$site->field_ref_organization[$lang][0]['nid'] = $keys[0];
+		}
+		$site = node_submit($site); // Prepare node for a submit
+		node_save($site);
+	}
+	
+}
+
+function import_csv_paramcols($autogen, &$context){
+
+	if (!isset($context['sandbox']['progress'])) {
+		$context['sandbox']['progress'] = 0;
+	}
+	
+	$lang = $autogen->language;
+	$file_path = drupal_realpath($autogen->field_file[$lang][0]['file']->uri);
+	$file_info = pathinfo($file_path);
+	$file_name =  basename($file_path,'.'.$file_info['extension']);
+	$tablename = db_escape_table($file_name);
+	$conn =  Database::getConnection('import', 'import');
+	
+	if($context['sandbox']['progress'] == 0) {
+		$conn->query('DROP TABLE IF EXISTS ' . $tablename . ';');
+		$conn->query('CREATE TABLE ' . $tablename . ' (date TEXT, site INTEGER, parameter TEXT, result REAL);'); //, PRIMARY KEY(site, date, parameter));');
+		$size = filesize($file_path);
+		$context['sandbox']['max'] = $size;
+		$context['results']['tablename'] = $tablename;
+		$_SESSION['table'] = $tablename;
+	}
+
+	$position = $context['sandbox']['progress'];
+	$size = $context['sandbox']['max'];	
+
+
+	$handle = fopen($file_path, 'r');
+	fseek($handle, $context['sandbox']['progress']);
+	
+	$numrows = 1000;
+	$start = $context['sandbox']['progress'];
+	$end = $start + $numrows;
+	if($end > $context['sandbox']['max'])
+		$end = $context['sandbox']['max'] ;
+	
+	//$rows = $context['sandbox']['xml'];
+	//$rows = $context['results']['xml'];
+	//for($i = 0; $i < 10; $i++)
+	//echo '# children: ' . count($children);
+	
+	$columns = array();
+	$colpos = array();
+	$params = array();
+	
+	for($i = $start; $i < $end; )
+	{
+
+		if(($data = fgetcsv($handle)) !== FALSE) {
+			
+			// check for first row and get column names
+			if($i == 0) { 
+				$columns = $data;
+				for($j = 2; $j < count($data);$j++){
+					//$columns[$j] = strtolower($data[$j]);
+					//$colpos[]
+// 					$d = strtolower($data[$j]);
+// 					if($d == 'date')
+// 						$colpos['date'] = $j;
+// 					else if($d == 'site')
+// 						$colpos['site'] = $j;
+// 					else {
+						$colpos[$data[$j]] = $j;
+						$params[] = $data[$j];
+// 					}
+				}
+				continue;
+			}
+			
+			$q = "INSERT INTO " . $tablename . " VALUES (:date, :site, :param, :result)";
+			foreach($params as $p) {
+				$q_params = array (':site' => $data[1], ':date' => $data[0], ':param' => $p, ':result' => $data[$colpos[$p]]);
+				$conn->query($q, $q_params);
+			}
+			
+			$i = ftell($handle);
+			$context['sandbox']['progress'] = $i;
+		}
+		else {
+			$context['results']['message'] = "Error Importing CSV";
+			$context['finished'] = 1;
+			fclose($handle);
+		}
+
+	}
+	
+	fclose($handle);
+	$context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+	
+}
+
 function load_xml($autogen, &$context) {
 	if (!isset($context['sandbox']['progress'])) {
 		$context['sandbox']['progress'] = 0;
@@ -411,8 +510,10 @@ function load_xml($autogen, &$context) {
 
 	$lang = $autogen->language;
 	$file_path = drupal_realpath($autogen->field_file[$lang][0]['file']->uri);
-	$tablename = db_escape_table(basename($file_path, ".xml"));
-
+	$file_info = pathinfo($file_path);
+	$file_name =  basename($file_path,'.'.$file_info['extension']);
+	$tablename = db_escape_table($file_name);
+	
 	//echo $file_path;
 
 	// 		$reader = new XMLReader();
@@ -502,134 +603,6 @@ function load_xml($autogen, &$context) {
 		//echo "sqlite .tables returns this many records: " . $conn->exec('.tables');
 }
 
-function autogen_line_param_site_alltime($autogen, &$context) {
-	drupal_set_message('autogen_line_param_site_alltime!!');
-
-	$lang = $autogen->language;
-	$file_path = drupal_realpath($autogen->field_file[$lang][0]['file']->uri);
-	$tablename = db_escape_table(basename($file_path, ".xml"));
-	$conn = Database::getConnection('import', 'import');
-
-	$sites = $conn->query("select distinct site from ". $tablename ." where site < 65 order by site;");
-	foreach($sites as $dbsite) {
-		$site = $dbsite->site;
-		echo "site: ". $site ."<br/>";
-		$values = array();
-		// get em all in one query
-		$results = $conn->query('select parameter, date, result from ' . $tablename . ' where parameter != "NULL" and site = :site;', array(':site' => $site));
-		foreach($results as $result) {
-			$values[$result->parameter][$result->date] = $result->result;
-		}
-
-		foreach($values as $parameter => $pvalues) {
-			echo "&nbsp;&nbsp;param: ". $parameter ."<br/>";
-			foreach($pvalues as $date => $value){
-				echo "&nbsp;&nbsp;&nbsp;&nbsp;date: " . $date . ", value: " . $value ."<br/>";
-			}
-		}
-		break;
-	}
-
-
-
-	if(!isset($context['sandbox']['sites'])){
-		$dbsites = $conn->query("select distinct site from ". $tablename ." where site < 65 order by site;");
-		$sites = array();
-		foreach($dbsites as $dbsite) {
-			$sites[] = $dbsite->site;
-		}
-
-		$context['sandbox']['sites'] = $sites;
-		$context['sandbox']['siteidx'] = 0;
-		$context['sandbox']['sitemax'] = count($sites);
-	}
-
-	$sites = $context['sandbox']['sites'];
-	$start = $context['sandbox']['siteidx'];
-	$smax = $context['sandbox']['sitemax'];
-
-	$processNum = 1;
-	$end = $start + processNum;
-	if($end > $smax)
-	$end = $smax;
-
-	for($s = $start; $s < $end; $s++) {
-
-		$site = $sites[$s];
-		//echo "site: " . $site;
-
-		$values = array();
-		$results = $conn->query('select parameter, date, result from ' . $tablename . ' where parameter != "NULL" and site = :site;', array(':site' => $site));
-		foreach($results as $result) {
-			$values[$result->parameter][$result->date] = $result->result;
-		}
-
-		foreach($values as $parameter => $paramvals) {
-
-			/*
-			 $data = new stdClass(); // We create a new node object
-			$data->type = "watershed_data";
-			//$data->title =
-			$data->language = $lang;
-			$data->uid = $autogen->uid;
-			//$data->path = array('alias' => 'your node path'); // Setting a node path
-			node_object_prepare($data); // Set some default values.
-
-			// Let's add standard body field
-			//$data->body[$lang][0]['value'] = 'This is a body text';
-			//$data->body[$lang][0]['summary'] = 'Here goes a summary';
-			//$data->body[$lang][0]['format'] = 'filtered_html';
-			// If field has a format, you need to define it. Here we define a default filtered_html format for a body field
-
-			// Let's add some CCK/Fields API field. This is pretty similar to the body example
-			$data->field_custom_name[$lang][0]['value'] = 'This is a custom field value';
-			// If your custom field has a format, don't forget to define it here
-			$data->field_custom_name[$lang][0]['format'] = 'This is a custom field value';
-			// And etc. you can add as much fields here as your content type has. The sky is the limit... and the server specs, of course ;)
-
-			$get_region_nid = 'select field_ref_region_nid from field_data_field_ref_region where entity_id = 13;';
-			$region_nid = db_query('select field_ref_region_nid from {field_data_field_ref_region} where entity_id = %d', 12)->fetchField();
-
-			$nid = db_query('select entity_id from {field_data_field_id} where field_id_value = %s', $val)->fetchField();
-
-			// Some file on our system
-			//$file_path = drupal_realpath('somefile.png'); // Create a File object
-			// 	$file = (object) array(
-			// 	          'uid' => 1,
-			// 	          'uri' => $file_path,
-			// 	          'filemime' => file_get_mimetype($filepath),
-			// 	          'status' => 1,
-			// 	);
-			//	$file = file_copy($file, 'public://'); // Save the file to the root of the files directory. You can specify a subdirectory, for example, 'public://images'
-			//$file = $autogen['field_file'][$lang][0]['file']
-			//$data->field_file[LANGUAGE_NONE][0] = (array)$file; //associate the file object with the image field:
-				
-			$data->field_file = $autogen->field_file;
-
-			$node->field_tags[$lang][]['tid'] = 1;
-
-			$node = node_submit($node); // Prepare node for a submit
-			node_save($node); // After this call we'll get a nid
-			*/
-
-		} // end foreach ($values)
-
-
-		// 			$results = $conn->query('select date, result from '. $tablename .' where parameter = :param and site = :site order by date;', array(':param' => $parameter, ':site' => $site));
-		// 			foreach($results as $result) {
-		// 			}
-			
-
-		// save the current position
-		$context['sandbox']['siteidx'] = $s;
-	}
-
-
-
-	$context['finished'] = $context['sandbox']['siteidx'] / $context['sandbox']['sitemax'];
-}
-
-
 function autogen_line_param_regionsites_alltime($autogen, &$context) {
 	//drupal_set_message('autogen_line_param_regionsites_alltime!!');
 
@@ -644,21 +617,43 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 
 	$lang = $autogen->language;
 	$file_path = drupal_realpath($autogen->field_file[$lang][0]['file']->uri);
-	$tablename = db_escape_table(basename($file_path, ".xml"));
+	$file_info = pathinfo($file_path);
+	$file_name =  basename($file_path,'.'.$file_info['extension']);
+	$tablename = db_escape_table($file_name);
 	$conn = Database::getConnection('import', 'import');
 
 	if(!isset($context['sandbox']['parameters'])) {
 
 		// get station ids for each stationcat
-		$q = 'select {field_data_field_id}.entity_id as site_nid, field_stationcat_value as stationcat, field_id_value as siteid from {field_data_field_id}, {field_data_field_stationcat} where {field_data_field_id}.entity_id = {field_data_field_stationcat}.entity_id order by siteid, stationcat;';
-		/*
+		$q = 'SELECT field_data_field_id.entity_id as site_nid, field_data_field_stationcat.field_stationcat_value as stationcat, field_data_field_id.field_id_value as siteid
+						FROM field_data_field_id, field_data_field_stationcat, field_data_field_ref_organization 
+						WHERE field_data_field_id.entity_id = field_data_field_stationcat.entity_id 
+						AND field_data_field_ref_organization.entity_id = field_data_field_stationcat.entity_id
+						AND field_data_field_ref_organization.field_ref_organization_nid = :org_nid
+						ORDER BY siteid, stationcat;';
+		
+		/* example query result:
 		 495|LY|16
 		496|LY|17
 		526|LYT|47
 		516|MY|37
 		*/
+		
+		$org_nid = $autogen->field_ref_organization[$lang][0]['nid'];
+		$results = db_query($q, array(':org_nid' => $org_nid));
+		
+// 		// get station ids for each stationcat
+// 		$q = 'select {field_data_field_id}.entity_id as site_nid, field_stationcat_value as stationcat, field_id_value as siteid from {field_data_field_id}, {field_data_field_stationcat} where {field_data_field_id}.entity_id = {field_data_field_stationcat}.entity_id order by siteid, stationcat;';
+// 		/*
+// 		 495|LY|16
+// 		496|LY|17
+// 		526|LYT|47
+// 		516|MY|37
+// 		*/
+// 		$results = db_query($q);
+		
 		$regions = array();
-		$results = db_query($q);
+
 		foreach($results as $result) {
 			$regions[$result->stationcat][] = $result->siteid;
 		}
@@ -1098,469 +1093,6 @@ $context['finished'] = 1;
 }
 
 
-function autogen_line_param_stationcat_month_paramcols($autogen, &$context) {
-	//drupal_set_message('autogen_line_param_regionsites_alltime!!');
-
-	$libname = 'googlechartphplib';
-	$path = libraries_get_path($libname);
-	require_once($path ."/lib/GoogleChart.php");
-	require_once($path ."/lib/markers/GoogleChartShapeMarker.php");
-	require_once($path ."/lib/markers/GoogleChartTextMarker.php");
-
-	$lang = $autogen->language;
-	$file_path = drupal_realpath($autogen->field_file[$lang][0]['file']->uri);
-	$tablename = db_escape_table(basename($file_path, ".xml"));
-	$conn = Database::getConnection('import', 'import');
-
-	if(!isset($context['sandbox']['parameters'])) {
-
-		// get station ids for each stationcat
-		$q = 'select {field_data_field_id}.entity_id as site_nid, field_stationcat_value as stationcat, field_id_value as siteid from {field_data_field_id}, {field_data_field_stationcat} where {field_data_field_id}.entity_id = {field_data_field_stationcat}.entity_id order by siteid, stationcat;';
-		/*
-		 495|LY|16
-		496|LY|17
-		526|LYT|47
-		516|MY|37
-		*/
-		$regions = array();
-		$results = db_query($q);
-		foreach($results as $result) {
-			$regions[$result->stationcat][] = $result->siteid;
-		}
-		$context['sandbox']['regions'] = $regions;
-		$context['sandbox']['regionidx'] = 0;
-		$context['sandbox']['regionmax'] = count($regions);
-
-		$parameters = array();
-		$results = $conn->query('select distinct parameter from ' . $tablename . ' where parameter != "NULL"');
-		foreach($results as $result) {
-			$parameters[] = $result->parameter;
-		}
-		$context['sandbox']['parameters'] = $parameters;
-		$context['sandbox']['parameteridx'] = 0;
-		$context['sandbox']['parametermax'] = count($parameters);
-
-	}
-
-	// prepare parameter batch loop vars
-	$parameters = $context['sandbox']['parameters'];
-	$paramstart = $context['sandbox']['parameteridx'];
-	$parammax   = $context['sandbox']['parametermax'];
-
-	$paramProcessNum = 20; // process this number of params per batch
-	$paramend = $paramstart + $paramProcessNum;
-	if($paramend > $parammax)
-	$paramend = $parammax;
-
-	// prepare region batch loop vars
-	$regions     = $context['sandbox']['regions'];
-	$regionstart = $context['sandbox']['regionidx'];
-	$regionmax   = $context['sandbox']['regionmax'];
-
-	$regionProcessNum = 20;
-	$regionend = $regionstart + $regionProcessNum;
-	if($regionend > $regionmax)
-	$regionend = $regionmax;
-
-	for($p = $paramstart; $p < $paramend; $p++) {
-		$parameter = $parameters[$p];
-
-		//echo " {$parameter} <br/>";
-		// process all regions for this parameter
-		$paramValMax = 0;
-		$paramValMin = 0;
-
-		// 		$maxsiteregion = null;
-		// 		$maxsitecount = 0;
-
-		// 		foreach($regions as $region => $sites){
-		// 			$count = count($sites);
-		// 			if($count > $maxsitecount){
-		// 				$maxsiteregion = $region;
-		// 				$maxsitecount = $count;
-		// 			}
-		// 		}
-
-		//foreach($regions as $region => $sites) {
-		for($r = $regionstart; $r < $regionend; $r++) {
-			$regionkeys = array_keys($regions);
-			$region = $regionkeys[$r];
-			$sites = $regions[$region];
-			// 			$region = $maxsiteregion;
-			// 			$sites = $regions[$region];
-			//echo " {$region} <br/>";
-
-			$q = "select strftime('%Y-%m',date) as date, site, result from " . $tablename . ' where parameter = :parameter and (';
-			$wheres = array();
-			$wheres[':parameter'] = $parameter;
-			for($s = 0; $s < count($sites); $s++){
-				if($s != 0) $q.= ' or ';
-
-				$varname = ':site' . $s;
-				$q .= ' site = ' . $varname;
-				$wheres[$varname] = $sites[$s];
-			}
-			$q .=")";
-			$q .=" order by date, site";
-			//echo $q ."<br/>";
-			//print_r($wheres);
-
-
-			$results = $conn->query($q, $wheres);
-			$valsBySite = array();
-			$dates = array();
-			$regMax[$region] = 0;
-			$regMin[$region] = 0;
-
-			foreach($results as $result){
-				// store values
-				$valsBySite[$result->site][$result->date] = $result->result;
-				$dates[] = $result->date;
-
-				// store max and min for each region and for all regions
-				if($result->result > $regMax[$region])
-				$regMax[$region] = $result->result;
-				else if($result->result < $regMin[$region])
-				$regMin[$region] = $result->result;
-				if($result->result > $paramValMax)
-				$paramValMax = $result->result;
-				else if($result->result < $paramValMin)
-				$paramValMin = $result->result;
-			}
-
-
-			$start = new DateTime($dates[0]);
-			//echo " start: " . $start->format("Y-m-d");
-			$end = new DateTime($dates[count($dates)-1]);
-			//echo " end: " . $end->format("Y-m-d");
-			$diff = $start->diff($end);
-			//echo " diff: " . $diff->format("%Y-%m-%d");
-			$numMonths = (($diff->y * 12) + $diff->m);
-			//echo " months: " . $numMonths;
-			$cur = clone $start;
-
-			$xlbl = array();
-			$xlblpos = array();
-			$x2lbl = array();
-			$x2lblpos = array();
-			$slots = $numMonths + 2;
-			$slice = 100/$slots;
-			$slicei = 1;
-			$xdates = array();
-
-			for($i = 1; $i < $slots - 1; $i++){
-				$xdates[$i] = $cur->format("Y-m");
-				switch($cur->format("m")){
-					// 					case '3':
-					// 	 					echo " Mar";
-					// 	 					$xlbl[] = "Mar";
-					// 	 					$xlblpos[] = $i * $slice;
-					// 	 					break;
-					case '1':
-						//echo " Jan-" . $cur->format("Y");
-						$xlbl[] = "Jan";
-						$xlblpos[] = $i * $slice;
-						break;
-					case '4':
-						$x2lbl[] = $cur->format("Y");
-						$x2lblpos[] = $i * $slice;
-						break;
-					case '7':
-						//echo " Jul";
-						$xlbl[] = "Jul";
-						$xlblpos[] = $i * $slice;
-						break;
-				}
-				$cur->add(new DateInterval('P1M'));
-			}
-
-			$datas = array();
-			//print_r($valsBySite);
-			foreach($sites as $site) {
-				for($i = 0; $i< $slots; $i++){
-					if( isset($xdates[$i]) && isset($valsBySite[$site]) && is_array($valsBySite[$site]) && array_key_exists($xdates[$i], $valsBySite[$site]) )
-					$datas[$site][] = $valsBySite[$site][$xdates[$i]];
-					else
-					$datas[$site][] = null;
-				}
-			}
-
-			//echo "count(slots): ". $slots . "<br/>";
-			//echo "count(datas): ". count($datas[$site]) ."<br/>";
-
-			// 			foreach($valsBySite as $site => $datevals){
-			// 				foreach($sites as $site) {
-			// 				 	$datas[$site][] = (array_key_exists($site, $sitevals) ? $sitevals[$site] : null );
-			// 				}
-			// 			}
-
-			// 			foreach($sites as $site){
-			// 				echo "{$site} date count: ". count($datas[$site]) ."<br/>\n";
-			// 			}
-
-
-
-
-			$chart = new GoogleChart('lc', 900, 333);
-			$chart->setQueryMethod(GoogleChart::POST);
-			//$chart->setTitle("{$parameter} x {$region}");
-
-			$chart->setAutoscale(true);
-			$chart->setLegendPosition('b');
-			//$chart->setScale($paramValMin,$paramValMax);
-
-			//echo "<br/>regMin: {$paramValMin} regMax: {$paramValMax} <br/>";
-
-			$chart->setDataFormat(GoogleChart::EXTENDED_ENCODING);
-			// 			if($paramValMin < 0){
-			// 				$chart->setGridLines(10, 10, 1, 0, 0, (0 - $paramValMin));
-			// 			}
-
-
-			// 			// add one line
-			// 			//$data = new GoogleChartData(array(49,74,78,71,40,39,35,20,50,61,45));
-			// 			//$data2 = new GoogleChartData(array(74,78,null,40,39,35,20,50,61,45,49));
-			// 			//$datas = array();
-			// 			foreach($valsByDate as $date => $valsites){
-			// 				//echo $date ." <br/> ";
-			// 				 foreach(array_keys($sites) as $site) {
-			// 				 	//echo $site ." | ". $valsByDate[$date][$site] . "<br/>";
-			// 				 	//if($valsByDate[$date])
-			// 				 }
-			// 				 //echo "<br/>";
-			// 			}
-
-			$chartDatas = array();
-			foreach($sites as $site){
-				$chartDatas[$site] = new GoogleChartData($datas[$site]);
-				//$chartDatas[$site]->setScale($regMin[$region], $regMax[$region]);
-				$chartDatas[$site]->setColor(_random_color());
-				$chartDatas[$site]->setLegend($site);
-				$chart->addData($chartDatas[$site]);
-			}
-
-			//$data3 = new GoogleChartData(array(null));
-			//$chart->addData($data);
-			//$chart->addData($data2);
-
-			// 			foreach($sites as $site){
-			// 				$chart->addData($chartDatas[$site]);
-			// 			}
-
-
-
-			//$data = new GoogleChartData(array(0,10,20,30,32,38,50,0,-2,0,0,0,0,1,2,3,4,5,6,7,8,9,10));
-
-			//$data->setAutoscale(false);
-			//$chart->addData($data);
-			// 			$chart->addData($chartDatas[$sites[0]]);
-			// 			$chart->addData($chartDatas[$sites[1]]);
-			// 			$chart->addData($chartDatas[$sites[2]]);
-			// 			$chart->addData($chartDatas[$sites[3]]);
-
-			// customize y axis
-			$y_axis = new GoogleChartAxis('y');
-			//$y_axis->setDrawTickMarks(false)->setLabels(array(0,40,80));
-			//$y_axis->setLabels(array("min","zero","median","max"));
-			//$y_axis->setLabelPositions(-2,0,round($paramValMax/2,0),round($paramValMax));
-			$y_axis->setRange($paramValMin, $paramValMax);
-			$chart->addAxis($y_axis);
-
-			// 			$xcount = count($valsByDate);
-			// 			$xLabelPos = array();
-
-			// 			$dates = array_keys($valsByDate);
-			// 			for($l = 0; $l < $xcount; $l++){
-			// 				$xLabelPos[$l] = $l *  100 / ($xcount - 1);
-			// 				$d = date_parse($dates[$l]);
-			// 				if($d['month'] == 3)
-			// 					$xlbl[] = array('Mar', $xLabelPos[$l]);
-			// 			}
-
-			// customize x axis
-			$x_axis = new GoogleChartAxis('x');
-			$x_axis->setTickMarks(5);
-			$x_axis->setLabels($xlbl);
-			$x_axis->setLabelPositions($xlblpos);
-			//$x_axis->set
-			$chart->addAxis($x_axis);
-
-			$x2_axis = new GoogleChartAxis('x');
-			//$x2_axis->setTickMarks(5);
-			$x2_axis->setLabels($x2lbl);
-			$x2_axis->setLabelPositions($x2lblpos);
-			$chart->addAxis($x2_axis);
-
-			// add a shape marker with a border
-			foreach($chartDatas as $site => $data){
-				$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
-				$shape_marker->setSize(3);
-				$shape_marker->setBorder(0);
-				$shape_marker->setData($data);
-				$shape_marker->setColor($data->getColor());
-				$chart->addMarker($shape_marker);
-			}
-
-			// 			// add a shape marker with a border
-			// 			$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
-			// 			$shape_marker->setSize(6);
-			// 			$shape_marker->setBorder(2);
-			// 			$shape_marker->setData($data2);
-			// 			$chart->addMarker($shape_marker);
-
-			// 			// add a value marker
-			// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
-			// 			$value_marker->setData($data);
-			// 			$chart->addMarker($value_marker);
-
-			// 			// add a value marker
-			// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
-			// 			$value_marker->setData($data2);
-			// 			$chart->addMarker($value_marker);
-
-			//echo _embed($chart->getImage() , "image/png");
-
-			//echo $chart->toHtml();
-
-			//echo "ERROR: could not create directory";
-			$data = $chart->getImage();
-			//echo '<img src="'. _embed($data , "image/png") .'" alt=""/>';
-			$dir = "public://charts";
-			file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-			$tag = "time_{$region}_{$parameter}";
-			$filename = "{$tag}.png";
-			$file = file_save_data($data, "public://charts/{$filename}",FILE_EXISTS_REPLACE );
-			image_path_flush("public://charts/{$filename}");
-
-			//print_r();
-			//break;
-			// 			if(true){
-			// 			var_dump($chart->getQuery());
-			// 			printf('<iframe src="%s" width="500" height="200"></iframe>',$chart->getValidationUrl());
-			// 			}
-
-			//~ header('Content-Type: image/png');
-
-
-			//var_dump($autogen);
-			// replace or make the data node
-			$data = null;
-
-			$val = $tag;
-			$data_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_data' and field_id_value = :param", array(':param' => $val))->fetchField();
-			//echo "data_nid: {$data_nid} <br/>";
-			if($data_nid)
-			$data = node_load($data_nid);
-			else {
-				$data = new stdClass(); // We create a new node object
-				$data->type = "watershed_data";
-				//$data->title =
-				$data->language = $lang;
-				//$data->path = array('alias' => 'your node path'); // Setting a node path
-				node_object_prepare($data); // Set some default values.
-
-				$data->field_id[$lang][0]['value'] = $tag;
-				//var_dump($data);
-
-			}
-
-			$data->uid = $autogen->uid;
-
-
-			// Let's add standard body field
-			//$data->body[$lang][0]['value'] = 'This is a body text';
-			//$data->body[$lang][0]['summary'] = 'Here goes a summary';
-			//$data->body[$lang][0]['format'] = 'filtered_html';
-			// If field has a format, you need to define it. Here we define a default filtered_html format for a body field
-
-			//$get_region_nid = 'select field_ref_region_nid from field_data_field_ref_region where entity_id = 13;';
-			//$region_nid = db_query('select field_ref_region_nid from {field_data_field_ref_region} where entity_id = %d', 12)->fetchField();
-
-			//$nid = db_query('select entity_id from {field_data_field_id} where field_id_value = %s', $val)->fetchField();
-
-			// copy refs from the autogen node
-			$data->field_ref_category = $autogen->field_ref_category;
-			$data->field_ref_metadata = $autogen->field_ref_metadata;
-			$data->field_ref_background = $autogen->field_ref_background;
-			$data->field_ref_organization = $autogen->field_ref_organization;
-
-			// 			$data->field_ref_category[$lang][0]['nid'] = $autogen->field_ref_category[$lang][0]['nid'];
-			// 			$data->field_ref_metadata[$lang][0]['nid'] = $autogen->field_ref_metadata[$lang][0]['nid'];
-			// 			$data->field_ref_background[$lang][0]['nid'] = $autogen->field_ref_background[$lang][0]['nid'];
-			// 			$data->field_ref_organization[$lang][0]['nid'] = $autogen->field_ref_organization[$lang][0]['nid'];
-
-			$val = $parameter;
-			$param_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_parameter' and field_id_value = :param", array(':param' => $val))->fetchField();
-			$data->field_ref_param[$lang][0]['nid'] =  $param_nid;
-			$param_node = node_load($param_nid);
-
-			$val = strtolower(substr($region,0,2))."%";
-			$region_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_region' and field_id_value like :region", array(':region' => $val))->fetchField();
-			$data->field_ref_region[$lang][0]['nid'] = $region_nid;
-			//$region_node = node_load($region_nid);
-
-			$data->field_file = $autogen->field_file;
-			$data->field_chart[$lang][0]['fid'] = $file->fid;
-
-			$vid = db_query("select vid from {taxonomy_vocabulary} where machine_name = :name", array(":name" => 'years'))->fetchField();
-			//var_dump($vid);
-
-			$termstart = $start->format('Y');
-			//var_dump($termstart);
-			$term = (object) array('vid' => $vid, 'name' => $termstart);
-			//var_dump($term);
-			$tid = db_query("select tid from {taxonomy_term_data} where name = :name", array(":name" => $termstart))->fetchField();
-			//var_dump($tid);
-			if(!$tid)
-			taxonomy_term_save($term);
-			else
-			$term = taxonomy_term_load($tid);
-			//var_dump($term);
-
-			$data->field_tag_start_year[$lang][0]['tid'] = $term->tid;
-
-			$termend = $end->format('Y');
-			$term = (object) array('vid' => $vid, 'name' => $termend);
-			$tid = db_query("select tid from {taxonomy_term_data} where name = :name", array(":name" => $termend))->fetchField();
-			if(!$tid)
-			taxonomy_term_save($term);
-			else
-			$term = taxonomy_term_load($tid);
-
-			$data->field_tag_end_year[$lang][0]['tid'] = $term->tid;
-
-			$data->field_extra_title[$lang][0]['value'] = "Time Series";
-			$data->title = $autogen->field_ref_category[$lang][0]['node']->title . ": ". $param_node->title ." ". $autogen->field_ref_organization[$lang][0]['node']->title ." {$region} {$termstart}". ($termstart != $termend ? "-".$termend : '');
-
-			//var_dump($data);
-
-
-			// 			$termvalues = array('tid' => $termid, 'name' => $termname);
-			// 			taxonomy_save_term(&$termvalues);
-
-			//$node->field_tags[$lang][]['tid'] = 1;
-
-
-			$data = node_submit($data); // Prepare node for a submit
-			node_save($data); // After this call we'll get a nid
-
-
-			$context['sandbox']['regionidx'] = $r;
-
-			//break;
-		} // end region
-
-		$context['sandbox']['parameteridx'] = $p;
-	}
-
-
-
-	//$context['finished'] = $context['sandbox']['parameteridx'] / $context['sandbox']['parametermax'];
-	//drupal_set_message('autogen_line_param_allsites_alltime!!');
-	//$context['results']['message'] = 'autogen_line_param_regionsites_alltime!!';
-	$context['finished'] = 1;
-
-}
 
 function autogen_line_param_allsites_alltime($autogen, &$context) {
 	drupal_set_message('autogen_line_param_allsites_alltime!!');
