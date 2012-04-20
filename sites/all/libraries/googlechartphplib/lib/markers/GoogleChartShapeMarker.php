@@ -32,6 +32,7 @@ class GoogleChartShapeMarker extends GoogleChartMarker
 	const CIRCLE = 'o';
 	const SQUARE = 's';
 	const X = 'x';
+	const HORIZ_LINE = 'h';
 
 	protected $shape = null;
 
@@ -86,7 +87,7 @@ class GoogleChartShapeMarker extends GoogleChartMarker
 	/**
 	 * Displays only the selected point.
 	 *
-	 * @param $point (int) The index of the point to display (0 based) in the data serie
+	 * @param $point (int, or float for HORIZ_LINE) The index of the point to display (0 based) in the data serie
 	 * @return $this
 	 */
 	public function setPoint($point)
@@ -173,13 +174,22 @@ class GoogleChartShapeMarker extends GoogleChartMarker
 	public function compute($index, $chart_type = null)
 	{
 		if ( $index === null ) {
-			if ( $this->position === null ) {
-				throw new LogicException('Shape marker requires one data serie or requires to have a fixed position.');
+			if($this->points === null){
+				if ( $this->position === null) {
+					throw new LogicException('Shape marker requires one data serie or requires to have a fixed position.');
+				}
+	
+				// fixed position marker (x:y format)
+				$str = '@';
+				$points = $this->position['x'].':'.$this->position['y'];
 			}
-
-			// fixed position marker (x:y format)
-			$str = '@';
-			$points = $this->position['x'].':'.$this->position['y'];
+			else {
+				$str = '';
+				$points = $this->points;
+				$index = 0;
+				
+			}
+			
 		}
 		else {
 			$str = '';

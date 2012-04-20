@@ -822,7 +822,7 @@ class GoogleChart extends GoogleChartApi
 				continue;
 			
 			$max = max($values);
-			$min = min($values);
+			$min = min_mod($values);
 			if ( $max > $value_max ) {
 				$value_max = $max;
 			}
@@ -831,8 +831,8 @@ class GoogleChart extends GoogleChartApi
 			}
 		}
 		
-		if ( $value_min > 0 )
-			$value_min = 0;
+		//if ( $value_min > 0 )
+		//	$value_min = 0;
 
 		$this->scale = array('min' => $value_min, 'max' => $value_max);
 		return $this;
@@ -872,7 +872,7 @@ class GoogleChart extends GoogleChartApi
 			// data serie values and scale
 			if ( $d->hasValues() ) {
 				$data[] = $d->computeChd($this->data_format, $this->scale);
-				// compute per-data scale only if autoscale if off
+				// compute per-data scale only if autoscale is off
 				if ( ! $this->autoscale && ! $this->scale ) {
 					$scales[] = $d->computeChds();
 					if ( $d->hasCustomScale() ) {

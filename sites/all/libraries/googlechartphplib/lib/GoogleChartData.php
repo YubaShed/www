@@ -275,7 +275,7 @@ class GoogleChartData
 	{
 		if ( $this->autoscale == true ) {
 			if ( ! empty($this->values) ) {
-				$n = min($this->values);
+				$n = min_mod($this->values);
 				if ( $n > 0 )
 					$n = 0;
 				return array('min' => $n, 'max' => max($this->values));
@@ -556,7 +556,7 @@ class GoogleChartData
 	static public function encodeSimple(array $values, $min = null, $max = null)
 	{
 		if ( $min === null ) {
-			$min = min($values);
+			$min = min_mod($values);
 			// by default, we only want a min if there is negative values
 			if ( $min > 0 ) {
 				$min = 0;
@@ -597,29 +597,32 @@ class GoogleChartData
 	static public function encodeExtended(array $values, $min = null, $max = null)
 	{
 		if ( $min === null ) {
-			$min = min($values);
+			$min = min_mod($values);
 			// by default, we only want a min if there is negative values
-			if ( $min > 0 ) {
-				$min = 0;
-			}
+// 			if ( $min > 0 ) {
+// 				$min = 0;
+// 			}
 		}
 		if ( $max === null ) {
 			$max = max($values);
 		}
-		$max = $max + abs($min);
-		if ( $max == 0 )
-			return '';
+		if($min < 0) {
+			$max = $max + abs($min);
+			$min = 0;
+		}
+		//if ( $max == 0 )
+			//return '';
 
 		$map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.';
 		$str = '';
 
 		foreach ( $values as $v ) {
-			if ( $v === null ) {
+			if ( $v === null || ($max == 0 && $v == $max)) {
 				$str .= '__';
 				continue;
 			}
 
-			$n = floor(64 * 64 * (($v - $min) / $max));
+			$n = floor(64 * 64 * (($v - $min) / ($max - $min)));
 			if ( $n > (64*64 - 1) ) {
 				$str .= '..';
 			}

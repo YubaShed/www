@@ -78,7 +78,7 @@ function watershed_help($path, $arg) {
 // 	switch($delta){
 // 		case 'watershed':
 // 			$block['subject'] = t('Watershed Block');
-	
+
 // 			if(user_access('access content')){
 // 				//Use our custom function to retrieve data.
 // 				$result = watershed_block_contents('block');
@@ -113,7 +113,7 @@ function watershed_help($path, $arg) {
 // 					);
 // 				}
 // 			} // end if(user_access(...))
-	
+
 // 		return $block;
 // 	}
 // }
@@ -175,22 +175,22 @@ function watershed_test_form($form, &$form_state) {
 	// 		  '#type' => 'checkbox',
 	// 		  '#title' => t('Line Series: Parameter x Site x All Months'),
 	// 	);
-// 	$form['update_site_orgref'] = array(
-// 		  '#type' => 'checkbox', 	
-// 		  '#title' => t('Update Sites Organization reference'),
-// 	);
-	
-	
-	$form['import_xml'] = array(
-	  '#type' => 'checkbox', 	
-	  '#title' => t('Import XML into database (required data format: <DATA><ROW><Date/><Site/><Parameter/><Replicates/><Result/><ResQualCode/></ROW></DATA>'),
-	);
+	// 	$form['update_site_orgref'] = array(
+	// 		  '#type' => 'checkbox',
+	// 		  '#title' => t('Update Sites Organization reference'),
+	// 	);
+
+
+	// 	$form['import_xml'] = array(
+	// 	  '#type' => 'checkbox',
+	// 	  '#title' => t('Import XML into database (required data format: <DATA><ROW><Date/><Site/><Parameter/><Replicates/><Result/><ResQualCode/></ROW></DATA>'),
+	// 	);
 
 	$form['import_csv_paramcols'] = array(
 		  '#type' => 'checkbox', 	
 		  '#title' => t('Import CSV w/ multiple parameters as columns into database (required column format: Date, Site, Param1, Param2, etc)'),
 	);
-	
+
 	$form['line_param_regionsites_alltime'] = array(
 	  '#type' => 'checkbox', 	
 	  '#title' => t('Generate time series charts from imported data: Parameter x StationCat x Month from a single (mixed) parameter column'),
@@ -241,7 +241,7 @@ function _random_color(){
 }
 
 function _random_hex(){
-	return str_pad(strtoupper(dechex(rand(10,245))), 2, '0', STR_PAD_LEFT);
+	return str_pad(strtoupper(dechex(rand(15,240))), 2, '0', STR_PAD_LEFT);
 }
 function _embed($contents, $mime) {
 	return ('data:' . $mime . ';base64,' . base64_encode($contents));
@@ -250,17 +250,25 @@ function _embed($contents, $mime) {
 function watershed_test_form_validate($form, &$form_state){
 
 	if ( arg(0) == 'node' && is_numeric(arg(1)) && ! arg(2) ) {
-		//$autogen = node_load(arg(1));
+		$autogen = node_load(arg(1));
 		// Do something with $node
 		//print_r( $node );
-		
+
 	} else
 	form_set_error('watershed_test_form', t('Unable to recognize the node ID'));
 
-
+	echo "YeeHaa!!";
 
 	//form_set_error('watershed_test_form', t('Fake error'));
 }
+
+
+function watershed_preprocess_node(&$vars) {
+	if($vars['type'] == 'watershed_data') {
+		drupal_add_js(drupal_get_path('module', 'watershed') . '/watershed.js');
+	}
+}
+
 
 
 function watershed_test_form_submit($form, &$form_state){
@@ -277,7 +285,7 @@ function watershed_test_form_submit($form, &$form_state){
 	  'title' => t('Importing Data'),
     'init_message' => t('Data import is starting.'),
 		'operations' => array(
-		//array('load_xml', array($autogen)),
+	//array('load_xml', array($autogen)),
 	),
 	  'finished' => 'autogen_finished_callback',
 	//'progress_message' => t('Processed @current out of @total.'),
@@ -295,21 +303,21 @@ function watershed_test_form_submit($form, &$form_state){
 	// 	if($form_state['values']['line_param_site_alltime']){
 	// 		$batch['operations'][] = array('autogen_line_param_site_alltime', array($autogen));
 	// 	}
-	
-	if($form_state['values']['update_site_orgref']){
-		$batch['operations'][] = array('update_site_orgref', array($autogen));
+
+	// 	if($form_state['values']['update_site_orgref']){
+	// 		$batch['operations'][] = array('update_site_orgref', array($autogen));
+	// 	}
+
+	//        if($form_state['values']['import_xml']){
+	//                 $batch['operations'][] = array('load_xml', array($autogen));
+	//         }
+
+	if($form_state['values']['import_csv_paramcols']){
+		$batch['operations'][] = array('import_csv_paramcols', array($autogen));
 	}
-	
-       if($form_state['values']['import_xml']){
-                $batch['operations'][] = array('load_xml', array($autogen));
-        }
-        
-        if($form_state['values']['import_csv_paramcols']){
-        	$batch['operations'][] = array('import_csv_paramcols', array($autogen));
-        }
-        
-        
-        if($form_state['values']['line_param_regionsites_alltime']){
+
+
+	if($form_state['values']['line_param_regionsites_alltime']){
 		$batch['operations'][] = array('autogen_line_param_regionsites_alltime', array($autogen));
 	}
 	// 	if($form_state['values']['line_param_allsites_alltime']){
@@ -317,14 +325,14 @@ function watershed_test_form_submit($form, &$form_state){
 	// 	}
 	// 	if($form_state['values']['box_param_region_alltime']){
 	// 		$batch['operations'][] = array('autogen_box_param_region_alltime', array($autogen));
-	// 	}
-	// 	if($form_state['values']['box_param_allsites_alltime']){
-	// 		$batch['operations'][] = array('autogen_box_param_allsites_alltime', array($autogen));
-	// 	}
+		// 	}
+		// 	if($form_state['values']['box_param_allsites_alltime']){
+		// 		$batch['operations'][] = array('autogen_box_param_allsites_alltime', array($autogen));
+		// 	}
 
-	//print_r($batch);
+		//print_r($batch);
 
-	batch_set($batch);
+		batch_set($batch);
 
 }
 
@@ -385,7 +393,7 @@ function update_site_orgref($autogen, &$context){
 	foreach($os as $o) {
 		$orgs[$o->nid] = $o->title;
 	}
-	
+
 	$q = 'select nid, title from node where type = "watershed_site"';
 	$ss = db_query($q);
 	foreach($ss as $s) {
@@ -405,83 +413,60 @@ function update_site_orgref($autogen, &$context){
 		$site = node_submit($site); // Prepare node for a submit
 		node_save($site);
 	}
-	
+
 }
 
 function import_csv_paramcols($autogen, &$context){
 
-	if (!isset($context['sandbox']['progress'])) {
-		$context['sandbox']['progress'] = 0;
-	}
-	
 	$lang = $autogen->language;
 	$file_path = drupal_realpath($autogen->field_file[$lang][0]['file']->uri);
 	$file_info = pathinfo($file_path);
 	$file_name =  basename($file_path,'.'.$file_info['extension']);
 	$tablename = db_escape_table($file_name);
 	$conn =  Database::getConnection('import', 'import');
-	
-	if($context['sandbox']['progress'] == 0) {
+
+	if (!isset($context['sandbox']['progress'])) {
+		$context['sandbox']['progress'] = 0;
 		$conn->query('DROP TABLE IF EXISTS ' . $tablename . ';');
 		$conn->query('CREATE TABLE ' . $tablename . ' (date TEXT, site INTEGER, parameter TEXT, result REAL);'); //, PRIMARY KEY(site, date, parameter));');
 		$size = filesize($file_path);
+		//echo "file size: " . $size;
 		$context['sandbox']['max'] = $size;
-		$context['results']['tablename'] = $tablename;
-		$_SESSION['table'] = $tablename;
+		$context['sandbox']['params'] = array();
 	}
-
-	$position = $context['sandbox']['progress'];
-	$size = $context['sandbox']['max'];	
-
-
+		
 	$handle = fopen($file_path, 'r');
 	fseek($handle, $context['sandbox']['progress']);
-	
-	$numrows = 1000;
+
+	$numbytes = 10000;
 	$start = $context['sandbox']['progress'];
-	$end = $start + $numrows;
+	$end = $start + $numbytes;
 	if($end > $context['sandbox']['max'])
-		$end = $context['sandbox']['max'] ;
-	
-	//$rows = $context['sandbox']['xml'];
-	//$rows = $context['results']['xml'];
-	//for($i = 0; $i < 10; $i++)
-	//echo '# children: ' . count($children);
-	
-	$columns = array();
-	$colpos = array();
-	$params = array();
-	
+	$end = $context['sandbox']['max'] ;
+
+
 	for($i = $start; $i < $end; )
 	{
 
 		if(($data = fgetcsv($handle)) !== FALSE) {
-			
+				
 			// check for first row and get column names
-			if($i == 0) { 
-				$columns = $data;
+			if($i == 0) {
 				for($j = 2; $j < count($data);$j++){
-					//$columns[$j] = strtolower($data[$j]);
-					//$colpos[]
-// 					$d = strtolower($data[$j]);
-// 					if($d == 'date')
-// 						$colpos['date'] = $j;
-// 					else if($d == 'site')
-// 						$colpos['site'] = $j;
-// 					else {
-						$colpos[$data[$j]] = $j;
-						$params[] = $data[$j];
-// 					}
+					$context['sandbox']['params'][$data[$j]] = $j;
 				}
+				$i = ftell($handle);
+				$context['sandbox']['progress'] = $i;
 				continue;
 			}
-			
+
+
 			$q = "INSERT INTO " . $tablename . " VALUES (:date, :site, :param, :result)";
-			foreach($params as $p) {
-				$q_params = array (':site' => $data[1], ':date' => $data[0], ':param' => $p, ':result' => $data[$colpos[$p]]);
+			foreach($context['sandbox']['params'] as $p => $pos) {
+				$q_params = array (':site' => $data[1], ':date' => $data[0], ':param' => str_replace(' ', '_', $p), ':result' => $data[$pos]);
 				$conn->query($q, $q_params);
 			}
-			
+				
 			$i = ftell($handle);
 			$context['sandbox']['progress'] = $i;
 		}
@@ -489,13 +474,15 @@ function import_csv_paramcols($autogen, &$context){
 			$context['results']['message'] = "Error Importing CSV";
 			$context['finished'] = 1;
 			fclose($handle);
+			return;
 		}
 
 	}
-	
+
 	fclose($handle);
+	//uncomment this to do them all
 	$context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
-	
+	//$context['finished'] = 1;
 }
 
 function load_xml($autogen, &$context) {
@@ -513,7 +500,7 @@ function load_xml($autogen, &$context) {
 	$file_info = pathinfo($file_path);
 	$file_name =  basename($file_path,'.'.$file_info['extension']);
 	$tablename = db_escape_table($file_name);
-	
+
 	//echo $file_path;
 
 	// 		$reader = new XMLReader();
@@ -523,88 +510,90 @@ function load_xml($autogen, &$context) {
 	// // 		while ($reader->read()) {
 	// // 			switch ($reader->nodeType) {
 	// // 				case (XMLREADER::ELEMENT):
-	// // 					if ($reader->localName == "entry") {
-	// // 						if ($reader->getAttribute("ID") == 5225) {
-	// // 							while ($reader->read()) {
-	// // 								if ($reader->nodeType == XMLREADER::ELEMENT) {
-	// // 									if ($reader->localName == "title") {
-	// // 										$reader->read();
-	// // 										echo $reader->value;
-	// // 										break;
-	// // 									}
-	// // 									if ($reader->localName == "entry") {
-	// // 										break;
-	// // 									}
-	// // 								}
-	// // 							}
-	// // 						}
-	// // 					}
-	// // 			}
-	// // 		}
+		// // 					if ($reader->localName == "entry") {
+		// // 						if ($reader->getAttribute("ID") == 5225) {
+			// // 							while ($reader->read()) {
+			// // 								if ($reader->nodeType == XMLREADER::ELEMENT) {
+				// // 									if ($reader->localName == "title") {
+				// // 										$reader->read();
+					// // 										echo $reader->value;
+					// // 										break;
+					// // 									}
+					// // 									if ($reader->localName == "entry") {
+					// // 										break;
+						// // 									}
+						// // 								}
+						// // 							}
+						// // 						}
+						// // 					}
+						// // 			}
+						// // 		}
 
 
-		$xml = simplexml_load_file($file_path);
-		$rows = $xml->children();
-		//$context['sandbox']['xml'] = $children;
-		//$context['results']['xml'] = $children;
+						$xml = simplexml_load_file($file_path);
+						$rows = $xml->children();
+						//$context['sandbox']['xml'] = $children;
+						//$context['results']['xml'] = $children;
 
-		if(!isset($context['sandbox']['max']))
-		$context['sandbox']['max'] = count($rows);
+						if(!isset($context['sandbox']['max']))
+						$context['sandbox']['max'] = count($rows);
 
-		//$tablename = db_escape_table($rows[0]->getName());
-		$context['results']['tablename'] = $tablename;
-		$_SESSION['table'] = $tablename;
-		$conn =  Database::getConnection('import', 'import');
-		//$context['sandbox']['conn'] = $conn;
+						//$tablename = db_escape_table($rows[0]->getName());
+						$context['results']['tablename'] = $tablename;
+						$_SESSION['table'] = $tablename;
+						$conn =  Database::getConnection('import', 'import');
+						//$context['sandbox']['conn'] = $conn;
 
-		if($context['sandbox']['progress'] == 0) {
-			$conn->query('DROP TABLE IF EXISTS ' . $tablename . ';');
-			$conn->query('CREATE TABLE ' . $tablename . ' (site INTEGER, date TEXT, parameter TEXT, replicates INTEGER, result REAL, resqualcode TEXT);'); //, PRIMARY KEY(site, date, parameter));');
-			//$context['finished'] = 0.01;
-			//drupal_set_message('move_xml_to_sqlite!!');
-			//return;
-		}
+						if($context['sandbox']['progress'] == 0) {
+							$conn->query('DROP TABLE IF EXISTS ' . $tablename . ';');
+							$conn->query('CREATE TABLE ' . $tablename . ' (site INTEGER, date TEXT, parameter TEXT, replicates INTEGER, result REAL, resqualcode TEXT);'); //, PRIMARY KEY(site, date, parameter));');
+							//$context['finished'] = 0.01;
+							//drupal_set_message('move_xml_to_sqlite!!');
+							//return;
+						}
 
 
-		//$conn =  Database::getConnection('import', 'import');
+						//$conn =  Database::getConnection('import', 'import');
 
-		//drupal_set_message('move_xml_to_sqlite!!');
-		$numrecords = 2000;
-		$start = $context['sandbox']['progress'];
-		$end = $start + $numrecords;
-		if($context['sandbox']['max'] < $end)
-		$end = $context['sandbox']['max'];
+						//drupal_set_message('move_xml_to_sqlite!!');
+						$numrecords = 2000;
+						$start = $context['sandbox']['progress'];
+						$end = $start + $numrecords;
+						if($context['sandbox']['max'] < $end)
+						$end = $context['sandbox']['max'];
 
-		//$rows = $context['sandbox']['xml'];
-		//$rows = $context['results']['xml'];
-		//for($i = 0; $i < 10; $i++)
-		//echo '# children: ' . count($children);
-		for($i = $start; $i < $end; $i++)
-		{
-			//echo $children[$i]->getName() . "<br />";
-			$cellvals = array();
-			foreach($rows[$i]->children() as $cell)
-			{
-				//$cellvalues[db_escape_field($cell->getName())] = $cell;
-				$cellvals[] = (string)$cell;
-				//echo $cellname . ": " . $child . " | ";
-			}
-			if(count($cellvals) < 5)
-			continue;
-			//echo "<br />\n";
-			//$conn->query( "INSERT INTO " . $tablename . " VALUES (:date, :site, :param, :rep, :result)", array (':date' => quoted_printable_encode( (string)$cellvals[0] ), ':site' => (int)$cellvals[1], ':param' => (string)$cellvals[2] , ':rep' => (string)$cellvals[3], ':result' => (float)$cellvals[4]));
-			$conn->query( "INSERT INTO " . $tablename . " VALUES (:vals)", array (':vals' => $cellvals ));
-			$context['sandbox']['progress'] = $i;
-		}
-		$context['results']['values'] = $i;
-		$context['finished'] = $i / $context['sandbox']['max'];
-		//echo "file path = " . $file_path;
-		///$result = db_query('.');
-		//echo "sqlite .tables returns this many records: " . $conn->exec('.tables');
+						//$rows = $context['sandbox']['xml'];
+						//$rows = $context['results']['xml'];
+						//for($i = 0; $i < 10; $i++)
+						//echo '# children: ' . count($children);
+						for($i = $start; $i < $end; $i++)
+						{
+							//echo $children[$i]->getName() . "<br />";
+							$cellvals = array();
+							foreach($rows[$i]->children() as $cell)
+							{
+								//$cellvalues[db_escape_field($cell->getName())] = $cell;
+								$cellvals[] = (string)$cell;
+								//echo $cellname . ": " . $child . " | ";
+							}
+							if(count($cellvals) < 5)
+							continue;
+							//echo "<br />\n";
+							//$conn->query( "INSERT INTO " . $tablename . " VALUES (:date, :site, :param, :rep, :result)", array (':date' => quoted_printable_encode( (string)$cellvals[0] ), ':site' => (int)$cellvals[1], ':param' => (string)$cellvals[2] , ':rep' => (string)$cellvals[3], ':result' => (float)$cellvals[4]));
+							$conn->query( "INSERT INTO " . $tablename . " VALUES (:vals)", array (':vals' => $cellvals ));
+							$context['sandbox']['progress'] = $i;
+						}
+						$context['results']['values'] = $i;
+						$context['finished'] = $i / $context['sandbox']['max'];
+						//echo "file path = " . $file_path;
+						///$result = db_query('.');
+						//echo "sqlite .tables returns this many records: " . $conn->exec('.tables');
 }
 
 function autogen_line_param_regionsites_alltime($autogen, &$context) {
 	//drupal_set_message('autogen_line_param_regionsites_alltime!!');
+
+
 
 	$libname = 'googlechartphplib';
 	$path = libraries_get_path($libname);
@@ -613,6 +602,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 	require_once($path ."/lib/GoogleChart.php");
 	require_once($path ."/lib/markers/GoogleChartShapeMarker.php");
 	require_once($path ."/lib/markers/GoogleChartTextMarker.php");
+	//require_once($path ."/lib/markers/GoogleChartLineMarker.php");
 
 
 	$lang = $autogen->language;
@@ -626,36 +616,37 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 
 		// get station ids for each stationcat
 		$q = 'SELECT field_data_field_id.entity_id as site_nid, field_data_field_stationcat.field_stationcat_value as stationcat, field_data_field_id.field_id_value as siteid
-						FROM field_data_field_id, field_data_field_stationcat, field_data_field_ref_organization 
-						WHERE field_data_field_id.entity_id = field_data_field_stationcat.entity_id 
-						AND field_data_field_ref_organization.entity_id = field_data_field_stationcat.entity_id
-						AND field_data_field_ref_organization.field_ref_organization_nid = :org_nid
-						ORDER BY siteid, stationcat;';
-		
+			 						FROM field_data_field_id, field_data_field_stationcat, field_data_field_ref_organization 
+			 						WHERE field_data_field_id.entity_id = field_data_field_stationcat.entity_id 
+			 						AND field_data_field_ref_organization.entity_id = field_data_field_stationcat.entity_id
+			 						AND field_data_field_ref_organization.field_ref_organization_nid = :org_nid
+			 						ORDER BY siteid, stationcat;';
+
 		/* example query result:
 		 495|LY|16
 		496|LY|17
 		526|LYT|47
 		516|MY|37
 		*/
-		
+
 		$org_nid = $autogen->field_ref_organization[$lang][0]['nid'];
 		$results = db_query($q, array(':org_nid' => $org_nid));
-		
-// 		// get station ids for each stationcat
-// 		$q = 'select {field_data_field_id}.entity_id as site_nid, field_stationcat_value as stationcat, field_id_value as siteid from {field_data_field_id}, {field_data_field_stationcat} where {field_data_field_id}.entity_id = {field_data_field_stationcat}.entity_id order by siteid, stationcat;';
-// 		/*
-// 		 495|LY|16
-// 		496|LY|17
-// 		526|LYT|47
-// 		516|MY|37
-// 		*/
-// 		$results = db_query($q);
-		
+
+		// 		// get station ids for each stationcat
+		//		$q = 'select {field_data_field_id}.entity_id as site_nid, field_stationcat_value as stationcat, field_id_value as siteid from {field_data_field_id}, {field_data_field_stationcat} where {field_data_field_id}.entity_id = {field_data_field_stationcat}.entity_id order by siteid, stationcat;';
+		// 		/*
+		// 		 495|LY|16
+		// 		496|LY|17
+		// 		526|LYT|47
+		// 		516|MY|37
+		// 		*/
+		//		$results = db_query($q);
+
 		$regions = array();
 
 		foreach($results as $result) {
-			$regions[$result->stationcat][] = $result->siteid;
+			$regions[$result->stationcat]['siteids'][] = $result->siteid;
+			$regions[$result->stationcat]['site_nids'][] = $result->site_nid;
 		}
 		$context['sandbox']['regions'] = $regions;
 		$context['sandbox']['regionidx'] = 0;
@@ -670,35 +661,52 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 		$context['sandbox']['parameteridx'] = 0;
 		$context['sandbox']['parametermax'] = count($parameters);
 
-	}
+		// get parameter config from autogen
+		$pctext = $autogen->field_param_config[$lang][0]['value'];
+		if(isset($pctext) && $pctext != '') {
+			$pcrows = explode("\n", $pctext);
+			$paramConfig = array();
+			foreach($pcrows as $pcrow) {
+				$pcs = explode("|", trim($pcrow));
+				if(count($pcs) != 3)
+				continue;
+				$paramConfig[str_replace(' ','_',trim($pcs[0]))][trim($pcs[1])][] = trim($pcs[2]);
+			}
+			if(count($paramConfig) > 0){
+				$context['sandbox']['paramConfig'] = $paramConfig;
+			}
+		}
+	} ///if(!isset($context['sandbox']['parameters'])) {
 
 	// prepare parameter batch loop vars
 	$parameters = $context['sandbox']['parameters'];
 	$paramstart = $context['sandbox']['parameteridx'];
 	$parammax   = $context['sandbox']['parametermax'];
 
-	$paramProcessNum = 20; // process this number of params per batch
+	$paramProcessNum = 1; // process this number of params per batch
 	$paramend = $paramstart + $paramProcessNum;
 	if($paramend > $parammax)
-		$paramend = $parammax;
+	$paramend = $parammax;
 
 	// prepare region batch loop vars
 	$regions     = $context['sandbox']['regions'];
-	$regionstart = $context['sandbox']['regionidx'];
+	//$regionstart = $context['sandbox']['regionidx'];
+	$regionstart = 0;
 	$regionmax   = $context['sandbox']['regionmax'];
 
-	$regionProcessNum = 20;
+	$regionProcessNum = 50;
 	$regionend = $regionstart + $regionProcessNum;
 	if($regionend > $regionmax)
 	$regionend = $regionmax;
 
 	for($p = $paramstart; $p < $paramend; $p++) {
 		$parameter = $parameters[$p];
+		$context['sandbox']['parameteridx'] = p;
 
 		//echo " {$parameter} <br/>";
 		// process all regions for this parameter
-		$paramValMax = 0;
-		$paramValMin = 0;
+		$paramValMax = -999999;
+		$paramValMin = 999999;
 
 		// 		$maxsiteregion = null;
 		// 		$maxsitecount = 0;
@@ -711,11 +719,19 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 		// 			}
 		// 		}
 
+		// get max & min for this parameter
+		$q = "select max(result) as max, min(result) as min from " . $tablename . " where parameter = :parameter and result != 'NULL'";
+		$results = $conn->query($q, array(':parameter' => $parameter));
+		$result = $results->fetchObject();
+		$paramValMax = $result->max;
+		$paramValMin = $result->min;
+
 		//foreach($regions as $region => $sites) {
 		for($r = $regionstart; $r < $regionend; $r++) {
+			$context['sandbox']['regionidx'] = $r;
 			$regionkeys = array_keys($regions);
 			$region = $regionkeys[$r];
-			$sites = $regions[$region];
+			$sites = $regions[$region]['siteids'];
 			// 			$region = $maxsiteregion;
 			// 			$sites = $regions[$region];
 			//echo " {$region} <br/>";
@@ -730,7 +746,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				$q .= ' site = ' . $varname;
 				$wheres[$varname] = $sites[$s];
 			}
-			$q .=")";
+			$q .=") and result != 'NULL'";
 			$q .=" order by date, site";
 			//echo $q ."<br/>";
 			//print_r($wheres);
@@ -738,26 +754,34 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 
 			$results = $conn->query($q, $wheres);
 			$valsBySite = array();
+			$valsByDate = array();
 			$dates = array();
-			$regMax[$region] = 0;
-			$regMin[$region] = 0;
+			$regMaxs[$region] = -99999;
+			$regMins[$region] = 99999;
 
 			foreach($results as $result){
 				// store values
 				$valsBySite[$result->site][$result->date] = $result->result;
 				$dates[] = $result->date;
+				$valsByDate[$result->date][$result->site] = $result->result;
 
-				// store max and min for each region and for all regions
-				if($result->result > $regMax[$region])
-				$regMax[$region] = $result->result;
-				else if($result->result < $regMin[$region])
-				$regMin[$region] = $result->result;
-				if($result->result > $paramValMax)
-				$paramValMax = $result->result;
-				else if($result->result < $paramValMin)
-				$paramValMin = $result->result;
+				// 				// store max and min for each region and for all regions
+				// 				if($result->result > $regMaxs[$region])
+				// 				$regMaxs[$region] = $result->result;
+				// 				else if($result->result < $regMins[$region])
+				// 				$regMins[$region] = $result->result;
+				// 				if($result->result > $paramValMax)
+				// 				$paramValMax = $result->result;
+				// 				else if($result->result < $paramValMin)
+				// 				$paramValMin = $result->result;
 			}
 
+			// 			$regMin = $regMins[$region];
+			// 			$regMax = $regMaxs[$region];
+
+
+			if(count($dates) == 0)
+			continue;
 
 			$start = new DateTime($dates[0]);
 			//echo " start: " . $start->format("Y-m-d");
@@ -765,7 +789,8 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 			//echo " end: " . $end->format("Y-m-d");
 			$diff = $start->diff($end);
 			//echo " diff: " . $diff->format("%Y-%m-%d");
-			$numMonths = (($diff->y * 12) + $diff->m);
+			// find number of months, inclusive, between first and last data point
+			$numMonths = (($diff->y * 12) + $diff->m + 1);
 			//echo " months: " . $numMonths;
 			$cur = clone $start;
 
@@ -773,11 +798,16 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 			$xlblpos = array();
 			$x2lbl = array();
 			$x2lblpos = array();
+			// create graph slots for each month, plus one on each end
 			$slots = $numMonths + 2;
+			//compute width of each slice
 			$slice = 100/$slots;
+			//set slice indexer
 			$slicei = 1;
+			//var for holding each chart date
 			$xdates = array();
 
+			// loop through months and format for display, also create X labels for some months
 			for($i = 1; $i < $slots - 1; $i++){
 				$xdates[$i] = $cur->format("Y-m");
 				switch($cur->format("m")){
@@ -803,7 +833,6 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				}
 				$cur->add(new DateInterval('P1M'));
 			}
-
 			$datas = array();
 			//print_r($valsBySite);
 			foreach($sites as $site) {
@@ -814,7 +843,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 					$datas[$site][] = null;
 				}
 			}
-				
+
 			//echo "count(slots): ". $slots . "<br/>";
 			//echo "count(datas): ". count($datas[$site]) ."<br/>";
 
@@ -833,11 +862,18 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 
 			$chart = new GoogleChart('lc', 900, 333);
 			$chart->setQueryMethod(GoogleChart::POST);
-			//$chart->setTitle("{$parameter} x {$region}");
 
-			$chart->setAutoscale(true);
+			$title = str_replace('_', ' ', $parameter);
+			$unit = $title;
+			if(isset($context['sandbox']['paramConfig'][$parameter]['UNIT'])){
+				$unit = $context['sandbox']['paramConfig'][$parameter]['UNIT'][0];
+				$title .= " (". $unit . ")";
+			}
+			//$chart->setTitle($title);
+
+			$chart->setAutoscale(false);
 			$chart->setLegendPosition('b');
-			//$chart->setScale($paramValMin,$paramValMax);
+			$chart->setScale($paramValMin,$paramValMax);
 
 			//echo "<br/>regMin: {$paramValMin} regMax: {$paramValMax} <br/>";
 
@@ -845,8 +881,8 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 			// 			if($paramValMin < 0){
 			// 				$chart->setGridLines(10, 10, 1, 0, 0, (0 - $paramValMin));
 			// 			}
-				
-				
+
+
 			// 			// add one line
 			// 			//$data = new GoogleChartData(array(49,74,78,71,40,39,35,20,50,61,45));
 			// 			//$data2 = new GoogleChartData(array(74,78,null,40,39,35,20,50,61,45,49));
@@ -862,11 +898,21 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 
 			$chartDatas = array();
 			foreach($sites as $site){
-				$chartDatas[$site] = new GoogleChartData($datas[$site]);
-				//$chartDatas[$site]->setScale($regMin[$region], $regMax[$region]);
-				$chartDatas[$site]->setColor(_random_color());
-				$chartDatas[$site]->setLegend($site);
-				$chart->addData($chartDatas[$site]);
+				$hasVal = false;
+				foreach($datas[$site] as $d){
+					if(is_numeric($d)){
+						$hasVal = true;
+						break;
+					}
+				}
+				if($hasVal) {
+					$chartDatas[$site] = new GoogleChartData($datas[$site]);
+					//$chartDatas[$site]->setScale($regMin[$region], $regMax[$region]);
+					$chartDatas[$site]->setScale($paramValMin, $paramValMax);
+					$chartDatas[$site]->setColor(_random_color());
+					$chartDatas[$site]->setLegend($site);
+					$chart->addData($chartDatas[$site]);
+				}
 			}
 
 			//$data3 = new GoogleChartData(array(null));
@@ -888,13 +934,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 			// 			$chart->addData($chartDatas[$sites[2]]);
 			// 			$chart->addData($chartDatas[$sites[3]]);
 
-			// customize y axis
-			$y_axis = new GoogleChartAxis('y');
-			//$y_axis->setDrawTickMarks(false)->setLabels(array(0,40,80));
-			//$y_axis->setLabels(array("min","zero","median","max"));
-			//$y_axis->setLabelPositions(-2,0,round($paramValMax/2,0),round($paramValMax));
-			$y_axis->setRange($paramValMin, $paramValMax);
-			$chart->addAxis($y_axis);
+
 
 			// 			$xcount = count($valsByDate);
 			// 			$xLabelPos = array();
@@ -902,269 +942,401 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 			// 			$dates = array_keys($valsByDate);
 			// 			for($l = 0; $l < $xcount; $l++){
 			// 				$xLabelPos[$l] = $l *  100 / ($xcount - 1);
-			// 				$d = date_parse($dates[$l]);
-			// 				if($d['month'] == 3)
-			// 					$xlbl[] = array('Mar', $xLabelPos[$l]);
-			// 			}
+				// 				$d = date_parse($dates[$l]);
+				// 				if($d['month'] == 3)
+				// 					$xlbl[] = array('Mar', $xLabelPos[$l]);
+				// 			}
 
-			// customize x axis
-			$x_axis = new GoogleChartAxis('x');
-			$x_axis->setTickMarks(5);
-			$x_axis->setLabels($xlbl);
-			$x_axis->setLabelPositions($xlblpos);
-			//$x_axis->set
-			$chart->addAxis($x_axis);
+				// customize x axis
+				$x_axis = new GoogleChartAxis('x');
+				$x_axis->setTickMarks(5);
+				$x_axis->setLabels($xlbl);
+				$x_axis->setLabelPositions($xlblpos);
+				//$x_axis->set
+				$chart->addAxis($x_axis);
 
-			$x2_axis = new GoogleChartAxis('x');
-			//$x2_axis->setTickMarks(5);
-			$x2_axis->setLabels($x2lbl);
-			$x2_axis->setLabelPositions($x2lblpos);
-			$chart->addAxis($x2_axis);
+				$x2_axis = new GoogleChartAxis('x');
+				//$x2_axis->setTickMarks(5);
+				$x2_axis->setLabels($x2lbl);
+				$x2_axis->setLabelPositions($x2lblpos);
+				$chart->addAxis($x2_axis);
 
-			// add a shape marker with a border
-			foreach($chartDatas as $site => $data){
-				$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
-				$shape_marker->setSize(3);
-				$shape_marker->setBorder(0);
-				$shape_marker->setData($data);
-				$shape_marker->setColor($data->getColor());
-				$chart->addMarker($shape_marker);
-			}
+				// add a shape marker with a border
+				foreach($chartDatas as $site => $data){
+					$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
+					$shape_marker->setSize(3);
+					$shape_marker->setBorder(0);
+					$shape_marker->setData($data);
+					$shape_marker->setColor($data->getColor());
+					$chart->addMarker($shape_marker);
+				}
 
-			// 			// add a shape marker with a border
-			// 			$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
-			// 			$shape_marker->setSize(6);
-			// 			$shape_marker->setBorder(2);
-			// 			$shape_marker->setData($data2);
-			// 			$chart->addMarker($shape_marker);
+				// add QA lines if configured
+				if(isset($context['sandbox']['paramConfig']) && isset($context['sandbox']['paramConfig'][$parameter])){
+					$pc = $context['sandbox']['paramConfig'];
+					if(isset($pc[$parameter]['QALINE'])){
+						foreach($pc[$parameter]['QALINE'] as $pcline){
 
-			// 			// add a value marker
-			// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
-			// 			$value_marker->setData($data);
-			// 			$chart->addMarker($value_marker);
+							if($pcline > $paramValMax || $pcline < $paramValMin)
+							continue;
 
-			// 			// add a value marker
-			// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
-			// 			$value_marker->setData($data2);
-			// 			$chart->addMarker($value_marker);
+							// 		if($parameter == "H2O_pH" && $region == "MY")
+							// 			$ya = true;
+							$pcrange = $paramValMax - $paramValMin;
+							$pcpos = ($pcline - $paramValMin) / $pcrange;
 
-			//echo _embed($chart->getImage() , "image/png");
+							$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::HORIZ_LINE);
+							$shape_marker->setSize(1);
+							$shape_marker->setColor('FF0000');
+							$shape_marker->setPoint($pcpos);
+							$chart->addMarker($shape_marker);
 
-			//echo $chart->toHtml();
+							// 									$line_marker = new GoogleChartRangeMarker();
+							// 									//if($paramValMin < 0)
+							// 									//$pcline = $pcline/$paramValMax
+							// 									$line_marker->setData(new GoogleChartData(array('6.5','7.5')));
+							// 									//$line_marker->setPoints(0,1);
+							// 									$line_marker->setSize(1);
+							// 									$line_marker->setColor('ff0000');
+							// 									$chart->addMarker($line_marker);
+						}
+					}
+					//foreach($paramConfig)
+				}
+					
+				// customize y axis
+				$y_axis = new GoogleChartAxis('y');
+				//$y_axis->setDrawTickMarks(false)->setLabels(array(0,40,80));
+				//$y_axis->setLabels(array("min","zero","median","max"));
+				//$y_axis->setLabelPositions(-2,0,round($paramValMax/2,0),round($paramValMax));
+				$y_axis->setRange($paramValMin, $paramValMax);
+				$chart->addAxis($y_axis);
 
-			//echo "ERROR: could not create directory";
-			$data = $chart->getImage();
-			//echo '<img src="'. _embed($data , "image/png") .'" alt=""/>';
-			$dir = "public://charts";
-			file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-			$tag = "time_{$region}_{$parameter}";
-			$filename = "{$tag}.png";
-			$file = file_save_data($data, "public://charts/{$filename}",FILE_EXISTS_REPLACE );
-			image_path_flush("public://charts/{$filename}");
-
-			//print_r();
-			//break;
-			// 			if(true){
-			// 			var_dump($chart->getQuery());
-			// 			printf('<iframe src="%s" width="500" height="200"></iframe>',$chart->getValidationUrl());
-			// 			}
-
-			//~ header('Content-Type: image/png');
+				$y2_axis = new GoogleChartAxis('y');
+				$y2_axis->setLabels(array("",$unit));
+				$chart->addAxis($y2_axis);
 
 
-			//var_dump($autogen);
-			// replace or make the data node
-			$data = null;
+				// 			// add a shape marker with a border
+				// 			$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
+				// 			$shape_marker->setSize(6);
+				// 			$shape_marker->setBorder(2);
+				// 			$shape_marker->setData($data2);
+				// 			$chart->addMarker($shape_marker);
 
-			$val = $tag;
-			$data_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_data' and field_id_value = :param", array(':param' => $val))->fetchField();
-			//echo "data_nid: {$data_nid} <br/>";
-			if($data_nid)
-			$data = node_load($data_nid);
-			else {
-				$data = new stdClass(); // We create a new node object
-				$data->type = "watershed_data";
-				//$data->title =
-				$data->language = $lang;
-				//$data->path = array('alias' => 'your node path'); // Setting a node path
-				node_object_prepare($data); // Set some default values.
+				// 			// add a value marker
+				// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
+				// 			$value_marker->setData($data);
+				// 			$chart->addMarker($value_marker);
 
-				$data->field_id[$lang][0]['value'] = $tag;
+				// 			// add a value marker
+				// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
+				// 			$value_marker->setData($data2);
+				// 			$chart->addMarker($value_marker);
+
+
+				//echo _embed($chart->getImage() , "image/png");
+
+				//echo $chart->toHtml();
+
+				//echo "ERROR: could not create directory";
+				$yes = ($parameter == "H2O_pH" && $region == "MY");
+				if($yes)
+				{
+					$chartquery = $chart->getQuery();
+				}
+				$image = $chart->getImage();
+				$dir = "public://charts";
+				file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+				$tag = "time_{$region}_{$parameter}";
+				$filename = "{$tag}.png";
+				$file = file_save_data($image, "public://charts/{$filename}",FILE_EXISTS_REPLACE );
+				image_path_flush("public://charts/{$filename}");
+
+				//print_r();
+				//break;
+				// 			echo '<img src="'. _embed($data , "image/png") .'" alt=""/>';
+				// 												if(true && isset($ya)){
+				// 												var_dump($chart->getQuery());
+				// //												printf('<iframe src="%s" width="500" height="200"></iframe>',$chart->getValidationUrl());
+				// 			break;
+				//}
+				//~ header('Content-Type: image/png');
+
+
+				//var_dump($autogen);
+				// replace or make the data node
+				$data = null;
+
+				$val = $tag;
+				$data_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_data' and field_id_value = :param", array(':param' => $val))->fetchField();
+				//echo "data_nid: {$data_nid} <br/>";
+				if($data_nid)
+				$data = node_load($data_nid);
+				else {
+					$data = new stdClass(); // We create a new node object
+					$data->type = "watershed_data";
+					//$data->title =
+					$data->language = $lang;
+					//$data->path = array('alias' => 'your node path'); // Setting a node path
+					node_object_prepare($data); // Set some default values.
+
+					$data->field_id[$lang][0]['value'] = $tag;
+					//var_dump($data);
+
+				}
+
+				$data->uid = $autogen->uid;
+
+
+				// Let's add standard body field
+				//$data->body[$lang][0]['value'] = 'This is a body text';
+				//$data->body[$lang][0]['summary'] = 'Here goes a summary';
+				//$data->body[$lang][0]['format'] = 'filtered_html';
+				// If field has a format, you need to define it. Here we define a default filtered_html format for a body field
+
+				//$get_region_nid = 'select field_ref_region_nid from field_data_field_ref_region where entity_id = 13;';
+				//$region_nid = db_query('select field_ref_region_nid from {field_data_field_ref_region} where entity_id = %d', 12)->fetchField();
+
+				//$nid = db_query('select entity_id from {field_data_field_id} where field_id_value = %s', $val)->fetchField();
+
+				// copy refs from the autogen node
+				$data->field_ref_category = $autogen->field_ref_category;
+				$data->field_ref_metadata = $autogen->field_ref_metadata;
+				$data->field_ref_background = $autogen->field_ref_background;
+				$data->field_ref_organization = $autogen->field_ref_organization;
+
+				// 			$data->field_ref_category[$lang][0]['nid'] = $autogen->field_ref_category[$lang][0]['nid'];
+				// 			$data->field_ref_metadata[$lang][0]['nid'] = $autogen->field_ref_metadata[$lang][0]['nid'];
+				// 			$data->field_ref_background[$lang][0]['nid'] = $autogen->field_ref_background[$lang][0]['nid'];
+				// 			$data->field_ref_organization[$lang][0]['nid'] = $autogen->field_ref_organization[$lang][0]['nid'];
+
+				$val = $parameter;
+				$param_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_parameter' and field_id_value = :param", array(':param' => $val))->fetchField();
+				$param_node = null;
+				if($param_nid === FALSE){
+					$param_node = new stdClass(); // create a new node object
+					$param_node->type = "watershed_parameter";
+					$param_node->title = str_replace('_' , ' ', $parameter);
+					$param_node->language = $lang;
+					//$data->path = array('alias' => 'your node path'); // Setting a node path
+					node_object_prepare($param_node); // Set some default values.
+
+					$param_node->field_id[$lang][0]['value'] = $val;
+					$param_node->uid = $autogen->uid;
+					$param_node = node_submit($param_node); // Prepare node for a submit
+					node_save($param_node); // After this call we'll get a nid
+
+					$param_nid = $param_node->nid;
+				}
+				else
+				$param_node = node_load($param_nid);
+
+				$data->field_ref_param[$lang][0]['nid'] =  $param_nid;
+
+				$site_nids = $regions[$region]['site_nids'];
+				$site_nid = $site_nids[0];
+				$q = 'SELECT field_ref_region_nid
+				FROM {field_data_field_ref_region}
+				WHERE entity_id = :site_nid;';
+				$region_nid = db_query($q, array(':site_nid' => $site_nid))->fetchField();
+				$data->field_ref_region[$lang][0]['nid'] = $region_nid;
+				//$region_node = node_load($region_nid);
+
+				$data->field_file = $autogen->field_file;
+				$data->field_chart[$lang][0]['fid'] = $file->fid;
+
+				$vid = db_query("select vid from {taxonomy_vocabulary} where machine_name = :name", array(":name" => 'years'))->fetchField();
+				//var_dump($vid);
+
+				$termstart = $start->format('Y');
+				//var_dump($termstart);
+				$term = (object) array('vid' => $vid, 'name' => $termstart);
+				//var_dump($term);
+				$tid = db_query("select tid from {taxonomy_term_data} where name = :name", array(":name" => $termstart))->fetchField();
+				//var_dump($tid);
+				if(!$tid)
+				taxonomy_term_save($term);
+				else
+				$term = taxonomy_term_load($tid);
+				//var_dump($term);
+
+				$data->field_tag_start_year[$lang][0]['tid'] = $term->tid;
+
+				$termend = $end->format('Y');
+				$term = (object) array('vid' => $vid, 'name' => $termend);
+				$tid = db_query("select tid from {taxonomy_term_data} where name = :name", array(":name" => $termend))->fetchField();
+				if(!$tid)
+				taxonomy_term_save($term);
+				else
+				$term = taxonomy_term_load($tid);
+
+				$data->field_tag_end_year[$lang][0]['tid'] = $term->tid;
+
+				$data->field_extra_title[$lang][0]['value'] = "Time Series";
+				$data->title = $autogen->field_ref_category[$lang][0]['node']->title . ": ". $param_node->title ." ". $autogen->field_ref_organization[$lang][0]['node']->title ." {$region} {$termstart}". ($termstart != $termend ? "-".$termend : '');
+
+
+
+				// generate the data table and the csv data file
+				$datatable = array('cell_0_0' => 'Date');
+				$str = "Date";
+				$i = 1;
+				foreach($sites as $site){
+					$datatable["cell_0_{$i}"] = "Site {$site}";
+					$str .= ", Site {$site}";
+					$i++;
+				}
+
+				$row = 1;
+				$col = 0;
+				$col_count = count($sites) + 1;
+				foreach($valsByDate as $vdate => $vsites){
+					$col = 0;
+					$datatable['cell_' . $row . '_' . $col] = $vdate;
+					$str .= "\n{$vdate}";
+					$col++;
+					foreach($sites as $site){
+						$yes = false;
+						foreach(array_keys($vsites) as $vsite){
+							if($vsite == $site){
+								$datatable['cell_' . $row . '_' . $col] = $valsByDate[$vdate][$vsite];
+								$str .= ",".$valsByDate[$vdate][$vsite];
+								$yes = true;
+								break;
+							}
+						}
+						if(!$yes){
+							$datatable['cell_' . $row . '_' . $col] = '';
+							$str .= ",";
+						}
+						$col++;
+					}
+					$row++;
+				}
+
+
+				$datatable['rebuild'] = array('count_cols' => $col_count, 'count_rows' => $row, 'rebuild' => 'Rebuild Table');
+				$datatable['import'] = array('tablefield_csv_field_data_table_0' => '', 'rebuild_field_data_table_0' => 'Upload CSV');
+
+				$data->field_data_table[$lang][0]['value'] = serialize($datatable);
 				//var_dump($data);
 
-			}
 
-			$data->uid = $autogen->uid;
-
-
-			// Let's add standard body field
-			//$data->body[$lang][0]['value'] = 'This is a body text';
-			//$data->body[$lang][0]['summary'] = 'Here goes a summary';
-			//$data->body[$lang][0]['format'] = 'filtered_html';
-			// If field has a format, you need to define it. Here we define a default filtered_html format for a body field
-
-			//$get_region_nid = 'select field_ref_region_nid from field_data_field_ref_region where entity_id = 13;';
-			//$region_nid = db_query('select field_ref_region_nid from {field_data_field_ref_region} where entity_id = %d', 12)->fetchField();
-
-			//$nid = db_query('select entity_id from {field_data_field_id} where field_id_value = %s', $val)->fetchField();
-
-			// copy refs from the autogen node
-			$data->field_ref_category = $autogen->field_ref_category;
-			$data->field_ref_metadata = $autogen->field_ref_metadata;
-			$data->field_ref_background = $autogen->field_ref_background;
-			$data->field_ref_organization = $autogen->field_ref_organization;
-
-			// 			$data->field_ref_category[$lang][0]['nid'] = $autogen->field_ref_category[$lang][0]['nid'];
-			// 			$data->field_ref_metadata[$lang][0]['nid'] = $autogen->field_ref_metadata[$lang][0]['nid'];
-			// 			$data->field_ref_background[$lang][0]['nid'] = $autogen->field_ref_background[$lang][0]['nid'];
-			// 			$data->field_ref_organization[$lang][0]['nid'] = $autogen->field_ref_organization[$lang][0]['nid'];
-
-			$val = $parameter;
-			$param_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_parameter' and field_id_value = :param", array(':param' => $val))->fetchField();
-			$data->field_ref_param[$lang][0]['nid'] =  $param_nid;
-			$param_node = node_load($param_nid);
-
-			$val = strtolower(substr($region,0,2))."%";
-			$region_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_region' and field_id_value like :region", array(':region' => $val))->fetchField();
-			$data->field_ref_region[$lang][0]['nid'] = $region_nid;
-			//$region_node = node_load($region_nid);
-
-			$data->field_file = $autogen->field_file;
-			$data->field_chart[$lang][0]['fid'] = $file->fid;
-
-			$vid = db_query("select vid from {taxonomy_vocabulary} where machine_name = :name", array(":name" => 'years'))->fetchField();
-			//var_dump($vid);
-
-			$termstart = $start->format('Y');
-			//var_dump($termstart);
-			$term = (object) array('vid' => $vid, 'name' => $termstart);
-			//var_dump($term);
-			$tid = db_query("select tid from {taxonomy_term_data} where name = :name", array(":name" => $termstart))->fetchField();
-			//var_dump($tid);
-			if(!$tid)
-			taxonomy_term_save($term);
-			else
-			$term = taxonomy_term_load($tid);
-			//var_dump($term);
-
-			$data->field_tag_start_year[$lang][0]['tid'] = $term->tid;
-
-			$termend = $end->format('Y');
-			$term = (object) array('vid' => $vid, 'name' => $termend);
-			$tid = db_query("select tid from {taxonomy_term_data} where name = :name", array(":name" => $termend))->fetchField();
-			if(!$tid)
-			taxonomy_term_save($term);
-			else
-			$term = taxonomy_term_load($tid);
-
-			$data->field_tag_end_year[$lang][0]['tid'] = $term->tid;
-
-			$data->field_extra_title[$lang][0]['value'] = "Time Series";
-			$data->title = $autogen->field_ref_category[$lang][0]['node']->title . ": ". $param_node->title ." ". $autogen->field_ref_organization[$lang][0]['node']->title ." {$region} {$termstart}". ($termstart != $termend ? "-".$termend : '');
-
-			//var_dump($data);
-
-
-			// 			$termvalues = array('tid' => $termid, 'name' => $termname);
-			// 			taxonomy_save_term(&$termvalues);
-
-			//$node->field_tags[$lang][]['tid'] = 1;
-
-
-			$data = node_submit($data); // Prepare node for a submit
-			node_save($data); // After this call we'll get a nid
-
-
-			$context['sandbox']['regionidx'] = $r;
-
-			//break;
-	} // end region
-
-	$context['sandbox']['parameteridx'] = $p;
-}
+				// generate the csv chart summary table
+				$dir = "public://tables/";
+				file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+				$tag = "time_{$region}_{$parameter}";
+				$filename = "{$tag}.csv";
+				$file = file_save_data($str, $dir . $filename,FILE_EXISTS_REPLACE );
+				//image_path_flush($dir . $filename);
+				$data->field_chart_data_file[$lang][0]['fid'] = $file->fid;
 
 
 
-//$context['finished'] = $context['sandbox']['parameteridx'] / $context['sandbox']['parametermax'];
-	//drupal_set_message('autogen_line_param_allsites_alltime!!');
-	//$context['results']['message'] = 'autogen_line_param_regionsites_alltime!!';
-$context['finished'] = 1;
+				// 			$termvalues = array('tid' => $termid, 'name' => $termname);
+				// 			taxonomy_save_term(&$termvalues);
 
-}
+				//$node->field_tags[$lang][]['tid'] = 1;
 
 
-
-function autogen_line_param_allsites_alltime($autogen, &$context) {
-	drupal_set_message('autogen_line_param_allsites_alltime!!');
-	$context['finished'] = 1;
-}
-
-function autogen_box_param_region_alltime($autogen, &$context) {
-	drupal_set_message('autogen_box_param_region_alltime!!');
-	$context['finished'] = 1;
-}
-
-function autogen_box_param_allsites_alltime($autogen, &$context) {
-	drupal_set_message('autogen_box_param_allsites_alltime!!');
-	$context['finished'] = 1;
-}
+				$data = node_submit($data); // Prepare node for a submit
+				node_save($data); // After this call we'll get a nid
 
 
-function autogen_finished_callback($success, $results, $operations) {
+				$context['sandbox']['regionidx'] = $r;
 
-	if ($success) {
-		$message = t('Complete.'); // . count($results['values']));
+				//break;
+			} // end region
+			$context['sandbox']['regionidx'] += 1;
+				
+			$context['sandbox']['parameteridx'] = $p;
+		}
+		$context['sandbox']['parameteridx'] += 1;
+		
+
+
+		$context['finished'] = $context['sandbox']['parameteridx'] / $context['sandbox']['parametermax'];
+		//drupal_set_message('autogen_line_param_allsites_alltime!!');
+		//$context['results']['message'] = 'autogen_line_param_regionsites_alltime!!';
+		//$context['finished'] = 1;
+
+
 	}
-	else {
-		$message = t('Finished with error.');
-	}
-	drupal_set_message($message);
-}
 
-/**
- * Implements hook_permission().
- */
-function watershed_permission(){
-	return array(
-	// 			'access watershed content' => array(
-	// 					'title' => t('Access content for the Watershed module'),
-	// 			),
+
+
+	function autogen_line_param_allsites_alltime($autogen, &$context) {
+		drupal_set_message('autogen_line_param_allsites_alltime!!');
+		$context['finished'] = 1;
+	}
+
+	function autogen_box_param_region_alltime($autogen, &$context) {
+		drupal_set_message('autogen_box_param_region_alltime!!');
+		$context['finished'] = 1;
+	}
+
+	function autogen_box_param_allsites_alltime($autogen, &$context) {
+		drupal_set_message('autogen_box_param_allsites_alltime!!');
+		$context['finished'] = 1;
+	}
+
+
+	function autogen_finished_callback($success, $results, $operations) {
+
+		if ($success) {
+			$message = t('Complete.'); // . count($results['values']));
+		}
+		else {
+			$message = t('Finished with error.');
+		}
+		drupal_set_message($message);
+	}
+
+	/**
+	 * Implements hook_permission().
+	 */
+	function watershed_permission(){
+		return array(
+		// 			'access watershed content' => array(
+		// 					'title' => t('Access content for the Watershed module'),
+		// 			),
 			'auto generate data records' => array(
 					'title' => t(' Data Records based on Autogen Source Data'),
-	)
-	);
-}
+		)
+		);
+	}
 
-// /**
-//  * Custom page callback function, declared in rimdb_menu().
-//  */
-// function _watershed_posts_page() {
-// 	$result = watershed_block_contents('page');
-// 	//Array to contain items for the page to render.
-// 	$items = array();
-// 	//Iterate over the resultset and format as links.
-// 	foreach ($result as $node) {
-// 		$items[] = array(
-// 				'data' => l($node->title, 'node/' . $node->nid),
-// 		);
-// 	}
+	// /**
+	//  * Custom page callback function, declared in rimdb_menu().
+	//  */
+	// function _watershed_posts_page() {
+	// 	$result = watershed_block_contents('page');
+		// 	//Array to contain items for the page to render.
+		// 	$items = array();
+		// 	//Iterate over the resultset and format as links.
+		// 	foreach ($result as $node) {
+		// 		$items[] = array(
+		// 				'data' => l($node->title, 'node/' . $node->nid),
+		// 		);
+		// 	}
 
-// 	if (empty($items)) { //No content in the last week.
-// 		$page_array['watershed_posts_arguments'] = array(
-// 		//Title serves as page subtitle
-// 				'#title' => t('All posts from the last week'),
-// 				'#markup' => t('No posts available.'),
-// 		);
-// 		return $page_array;
-// 	}
-// 	else {
-// 		$page_array['watershed_posts_arguments'] = array(
-// 				'#title' => t('All posts from the last week'),
-// 				'#items' => $items,
-// 				//Theme hook with suggestion.
-// 				'#theme' => 'item_list__watershed_posts',
-// 		);
-// 		return $page_array;
-// 	}
-// }
+		// 	if (empty($items)) { //No content in the last week.
+		// 		$page_array['watershed_posts_arguments'] = array(
+		// 		//Title serves as page subtitle
+		// 				'#title' => t('All posts from the last week'),
+		// 				'#markup' => t('No posts available.'),
+		// 		);
+		// 		return $page_array;
+		// 	}
+		// 	else {
+		// 		$page_array['watershed_posts_arguments'] = array(
+		// 				'#title' => t('All posts from the last week'),
+		// 				'#items' => $items,
+		// 				//Theme hook with suggestion.
+		// 				'#theme' => 'item_list__watershed_posts',
+		// 		);
+		// 		return $page_array;
+		// 	}
+		// }
 
