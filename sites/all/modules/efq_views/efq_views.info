@@ -1,4 +1,3 @@
-; $Id$
 name = EntityFieldQuery Views Backend
 description = Enables Views to use EntityFieldQuery as the query backend.
 package = Views
@@ -15,36 +14,23 @@ files[] = efq_views_plugin_row_entity.inc
 ; Views handlers
 files[] = handlers/efq_views_handler_field_entity.inc
 files[] = handlers/efq_views_handler_field_entity_label.inc
-files[] = handlers/efq_views_handler_filter_entity_numeric.inc
-files[] = handlers/efq_views_handler_filter_entity_label.inc
+files[] = handlers/efq_views_handler_filter_entity_integer.inc
 files[] = handlers/efq_views_handler_filter_entity_in_operator.inc
 files[] = handlers/efq_views_handler_sort_entity.inc
-files[] = handlers/efq_views_handler_sort_entity_label.inc
-files[] = handlers/efq_views_handler_argument_entity_numeric.inc
-files[] = handlers/efq_views_handler_argument_entity_label.inc
-
-files[] = handlers/efq_views_handler_argument_entity_type.inc
-files[] = handlers/efq_views_handler_filter_entity_type.inc
-files[] = handlers/efq_views_handler_argument_entity_type.inc
+files[] = handlers/efq_views_handler_argument_entity_integer.inc
 
 files[] = handlers/efq_views_handler_argument_entity_bundle.inc
 files[] = handlers/efq_views_handler_filter_entity_bundle.inc
-files[] = handlers/efq_views_handler_argument_entity_bundle.inc
 
-files[] = handlers/efq_views_handler_field_property.inc
 files[] = handlers/efq_views_handler_field_property_numeric.inc
-files[] = handlers/efq_views_handler_field_property_string.inc
-files[] = handlers/efq_views_handler_field_property_uri.inc
+files[] = handlers/efq_views_handler_field_property_text.inc
 files[] = handlers/efq_views_handler_field_property_boolean.inc
 files[] = handlers/efq_views_handler_field_property_date.inc
-files[] = handlers/efq_views_handler_filter_property.inc
 files[] = handlers/efq_views_handler_filter_property_string.inc
 files[] = handlers/efq_views_handler_filter_property_numeric.inc
 files[] = handlers/efq_views_handler_filter_property_in_operator.inc
 files[] = handlers/efq_views_handler_filter_property_boolean.inc
 files[] = handlers/efq_views_handler_filter_property_date.inc
-files[] = handlers/efq_views_handler_sort_property.inc
-files[] = handlers/efq_views_handler_argument_property.inc
 files[] = handlers/efq_views_handler_argument_property_numeric.inc
 files[] = handlers/efq_views_handler_argument_property_string.inc
 
@@ -55,9 +41,15 @@ files[] = handlers/efq_views_handler_filter_field_string.inc
 files[] = handlers/efq_views_handler_sort_field.inc
 files[] = handlers/efq_views_handler_argument_field_numeric.inc
 files[] = handlers/efq_views_handler_argument_field_string.inc
-; Information added by drupal.org packaging script on 2011-07-22
-version = "7.x-1.x-dev"
+
+files[] = handlers/efq_views_handler_filter_field_list.inc
+files[] = handlers/efq_views_handler_filter_in_operator.inc
+files[] = handlers/efq_views_handler_filter_numeric.inc
+files[] = handlers/efq_views_handler_filter_string.inc
+
+; Information added by drupal.org packaging script on 2012-05-27
+version = "7.x-1.0-alpha1"
 core = "7.x"
 project = "efq_views"
-datestamp = "1311293332"
+datestamp = "1338094855"
 

@@ -22,11 +22,9 @@ class efq_views_plugin_query extends views_plugin_query {
 
     // An entity type (such as EntityFieldQuery: Node) was selected.
     // We have entity type passed in as base table, prefixed with 'efq_'
-    if ($base_table != 'efq_multiple') {
-      $entity_type = str_replace('efq_', '', $base_table);
-      $this->entity_type = $entity_type;
-      $this->query->entityCondition('entity_type', $entity_type);
-    }
+    $entity_type = preg_replace('/^efq_/', '', $base_table);
+    $this->entity_type = $entity_type;
+    $this->query->entityCondition('entity_type', $entity_type);
   }
 
   function option_definition() {
@@ -129,13 +127,15 @@ class efq_views_plugin_query extends views_plugin_query {
         $this->pager->update_page_info();
       }
       catch (Exception $e) {
+        if (!empty($view->simpletest)) {
+          throw($e);
+        }
         // Show the full exception message in Views admin.
-        // However, don't show that to the user on the frontend.
         if (!empty($view->live_preview)) {
           drupal_set_message($e->getMessage(), 'error');
         }
         else {
-          drupal_set_message(t('An error occured while generating the requested view.'), 'error');
+          vpr('Exception in @human_name[@view_name]: @message', array('@human_name' => $view->human_name, '@view_name' => $view->name, '@message' => $e->getMessage()));
         }
         return;
       }
@@ -172,16 +172,20 @@ class efq_views_plugin_query extends views_plugin_query {
     }
     catch (Exception $e) {
       // Show the full exception message in Views admin.
-      // However, don't show that to the user on the frontend.
       if (!empty($view->live_preview)) {
         drupal_set_message($e->getMessage(), 'error');
       }
       else {
-        drupal_set_message(t('An error occured while generating the requested view.'), 'error');
+        vpr('Exception in @human_name[@view_name]: @message', array('@human_name' => $view->human_name, '@view_name' => $view->name, '@message' => $e->getMessage()));
       }
       return;
     }
 
     $view->execute_time = microtime(true) - $start;
+  }
+
+  function get_result_entities($results) {
+    $entity = reset($results);
+    return array($entity->entity_type, $results);
   }
 }
