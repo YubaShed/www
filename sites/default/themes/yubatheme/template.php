@@ -108,6 +108,9 @@ function yubatheme_preprocess_node(&$variables) {
   if ($variables['view_mode'] == 'full' && node_is_page($variables['node'])) {
     $variables['classes_array'][] = 'node-full';
   }
+  	if($variables['type'] == 'watershed_data') {
+  		drupal_add_js(path_to_theme() . '/watershed.js');
+  	}
 }
 
 /**
