@@ -108,9 +108,15 @@ function yubatheme_preprocess_node(&$variables) {
   if ($variables['view_mode'] == 'full' && node_is_page($variables['node'])) {
     $variables['classes_array'][] = 'node-full';
   }
-  	if($variables['type'] == 'watershed_data') {
-  		drupal_add_js(path_to_theme() . '/watershed.js');
+	if (isset($variables['node']->type)) {
+  	if($variables['node']->type == 'watershed_data') {
+  		//drupal_add_js(path_to_theme() . '/watershed.js');
+  		drupal_add_js('http://www.google.com/jsapi');
   	}
+		//$variables['theme_hook_suggestions'][] = 'node__' . $variables['node']->type;
+		//$variables['node']->yippee = $variables['theme_hook_suggestions'][];
+	}
+
 }
 
 /**
