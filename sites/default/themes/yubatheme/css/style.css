@@ -1,4 +1,6 @@
 
+
+
 /* ---------- Overall Specifications ---------- */
 
 body {
@@ -231,7 +233,7 @@ table ul.links li {
 .block ol,
 .block ul {
   margin: 0;
-  padding: 0 0 0.25em 1em; /* LTR */
+  /*padding: 0 0 0.25em 1em;*/ /* LTR */
 }
 .contextual-links-wrapper {
   font-size: small !important;

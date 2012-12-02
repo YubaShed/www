@@ -3,7 +3,7 @@
 
 body,
 body.overlay {
-  color: #3b3b3b;
+  color: #473b3b;
 }
 .comment .comment-arrow {
   border-color: #ffffff;
@@ -15,6 +15,10 @@ body.overlay {
   background: #ffffff;
 }
 
+#header, #page {
+  background:#63686e;
+}
+
 .tabs ul.primary li a.active {
   background-color: #ffffff;
 }
@@ -23,31 +27,31 @@ body.overlay {
   border-bottom: 1px solid #ffffff;
 }
 #header {
-  background-color: #48a9e4;
-  background-image: -moz-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -ms-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -o-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #0779bf), color-stop(1, #48a9e4));
-  background-image: -webkit-linear-gradient(top, #0779bf 0%, #48a9e4 100%);
-  background-image: linear-gradient(top, #0779bf 0%, #48a9e4 100%);
+  background-color: #63686e;
+  background-image: -moz-linear-gradient(top, #63686e 0%, #63686e 100%);
+  background-image: -ms-linear-gradient(top, #63686e 0%, #63686e 100%);
+  background-image: -o-linear-gradient(top, #63686e 0%, #63686e 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #63686e), color-stop(1, #63686e));
+  background-image: -webkit-linear-gradient(top, #63686e 0%, #63686e 100%);
+  background-image: linear-gradient(top, #63686e 0%, #63686e 100%);
 }
 a {
-  color: #0071B3;
+  color: #3b8387;
 }
 a:hover,
 a:focus {
-  color: #018fe2;
+  color: #4ba5aa;
 }
 a:active {
-  color: #23aeff;
+  color: #3b8387;
 }
 .sidebar .block {
-  background-color: #f6f6f2;
-  border-color: #f9f9f9;
+  background-color: #b9d3d2;
+  border-color: #b9d3d2;
 }
 #page-wrapper,
 #footer-wrapper {
-  background: #292929;
+  background: #63686e;
 }
 .region-header,
 .region-header a,

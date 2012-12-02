@@ -1,0 +1,7 @@
+<?php
+function migrate_rimdb_migrate_api() {
+  $api = array(
+    'api' => 2,
+  );
+  return $api;
+}

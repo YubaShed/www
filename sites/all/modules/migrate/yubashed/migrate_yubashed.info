@@ -1,0 +1,17 @@
+name = "Migrate rimdb data to yubashed"
+description = "Module to import rimdb data into yubashed.org"
+package = "zzz"
+core = 7.x
+dependencies[] = migrate
+dependencies[] = field
+dependencies[] = file
+dependencies[] = image
+#dependencies[] = number
+dependencies[] = text
+dependencies[] = options
+dependencies[] = taxonomy
+dependencies[] = date
+dependencies[] = media
+
+files[] = import_rimdb_wqfield.inc
+files[] = import_rimdb_wqlab.inc
