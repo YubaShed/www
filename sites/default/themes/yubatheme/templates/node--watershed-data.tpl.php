@@ -340,6 +340,10 @@ AmCharts.ready(function () {
 
   <?php print render($content['comments']); ?>
   
-  <?php var_dump($field_data_table);?>
+  <?php 
+      //var_dump($field_data_table);
+      var_dump($field_data_table[0]['tabledata']);
+
+  ?>
 
 </div>

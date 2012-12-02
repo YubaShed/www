@@ -859,199 +859,205 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 
 
 
+			
+// 			////// START GOOGLE MAP
 
-			$chart = new GoogleChart('lc', 900, 333);
-			$chart->setQueryMethod(GoogleChart::POST);
+// 			$chart = new GoogleChart('lc', 900, 333);
+// 			$chart->setQueryMethod(GoogleChart::POST);
 
-			$title = str_replace('_', ' ', $parameter);
-			$unit = $title;
-			if(isset($context['sandbox']['paramConfig'][$parameter]['UNIT'])){
-				$unit = $context['sandbox']['paramConfig'][$parameter]['UNIT'][0];
-				$title .= " (". $unit . ")";
-			}
-			//$chart->setTitle($title);
+// 			$title = str_replace('_', ' ', $parameter);
+// 			$unit = $title;
+// 			if(isset($context['sandbox']['paramConfig'][$parameter]['UNIT'])){
+// 				$unit = $context['sandbox']['paramConfig'][$parameter]['UNIT'][0];
+// 				$title .= " (". $unit . ")";
+// 			}
+// 			//$chart->setTitle($title);
 
-			$chart->setAutoscale(false);
-			$chart->setLegendPosition('b');
-			$chart->setScale($paramValMin,$paramValMax);
+// 			$chart->setAutoscale(false);
+// 			$chart->setLegendPosition('b');
+// 			$chart->setScale($paramValMin,$paramValMax);
 
-			//echo "<br/>regMin: {$paramValMin} regMax: {$paramValMax} <br/>";
+// 			//echo "<br/>regMin: {$paramValMin} regMax: {$paramValMax} <br/>";
 
-			$chart->setDataFormat(GoogleChart::EXTENDED_ENCODING);
-			// 			if($paramValMin < 0){
-			// 				$chart->setGridLines(10, 10, 1, 0, 0, (0 - $paramValMin));
-			// 			}
-
-
-			// 			// add one line
-			// 			//$data = new GoogleChartData(array(49,74,78,71,40,39,35,20,50,61,45));
-			// 			//$data2 = new GoogleChartData(array(74,78,null,40,39,35,20,50,61,45,49));
-			// 			//$datas = array();
-			// 			foreach($valsByDate as $date => $valsites){
-			// 				//echo $date ." <br/> ";
-			// 				 foreach(array_keys($sites) as $site) {
-			// 				 	//echo $site ." | ". $valsByDate[$date][$site] . "<br/>";
-			// 				 	//if($valsByDate[$date])
-			// 				 }
-			// 				 //echo "<br/>";
-			// 			}
-
-			$chartDatas = array();
-			foreach($sites as $site){
-				$hasVal = false;
-				foreach($datas[$site] as $d){
-					if(is_numeric($d)){
-						$hasVal = true;
-						break;
-					}
-				}
-				if($hasVal) {
-					$chartDatas[$site] = new GoogleChartData($datas[$site]);
-					//$chartDatas[$site]->setScale($regMin[$region], $regMax[$region]);
-					$chartDatas[$site]->setScale($paramValMin, $paramValMax);
-					$chartDatas[$site]->setColor(_random_color());
-					$chartDatas[$site]->setLegend($site);
-					$chart->addData($chartDatas[$site]);
-				}
-			}
-
-			//$data3 = new GoogleChartData(array(null));
-			//$chart->addData($data);
-			//$chart->addData($data2);
-
-			// 			foreach($sites as $site){
-			// 				$chart->addData($chartDatas[$site]);
-			// 			}
+// 			$chart->setDataFormat(GoogleChart::EXTENDED_ENCODING);
+// 			// 			if($paramValMin < 0){
+// 			// 				$chart->setGridLines(10, 10, 1, 0, 0, (0 - $paramValMin));
+// 			// 			}
 
 
+// 			// 			// add one line
+// 			// 			//$data = new GoogleChartData(array(49,74,78,71,40,39,35,20,50,61,45));
+// 			// 			//$data2 = new GoogleChartData(array(74,78,null,40,39,35,20,50,61,45,49));
+// 			// 			//$datas = array();
+// 			// 			foreach($valsByDate as $date => $valsites){
+// 			// 				//echo $date ." <br/> ";
+// 			// 				 foreach(array_keys($sites) as $site) {
+// 			// 				 	//echo $site ." | ". $valsByDate[$date][$site] . "<br/>";
+// 			// 				 	//if($valsByDate[$date])
+// 			// 				 }
+// 			// 				 //echo "<br/>";
+// 			// 			}
 
-			//$data = new GoogleChartData(array(0,10,20,30,32,38,50,0,-2,0,0,0,0,1,2,3,4,5,6,7,8,9,10));
+// 			$chartDatas = array();
+// 			foreach($sites as $site){
+// 				$hasVal = false;
+// 				foreach($datas[$site] as $d){
+// 					if(is_numeric($d)){
+// 						$hasVal = true;
+// 						break;
+// 					}
+// 				}
+// 				if($hasVal) {
+// 					$chartDatas[$site] = new GoogleChartData($datas[$site]);
+// 					//$chartDatas[$site]->setScale($regMin[$region], $regMax[$region]);
+// 					$chartDatas[$site]->setScale($paramValMin, $paramValMax);
+// 					$chartDatas[$site]->setColor(_random_color());
+// 					$chartDatas[$site]->setLegend($site);
+// 					$chart->addData($chartDatas[$site]);
+// 				}
+// 			}
 
-			//$data->setAutoscale(false);
-			//$chart->addData($data);
-			// 			$chart->addData($chartDatas[$sites[0]]);
-			// 			$chart->addData($chartDatas[$sites[1]]);
-			// 			$chart->addData($chartDatas[$sites[2]]);
-			// 			$chart->addData($chartDatas[$sites[3]]);
+// 			//$data3 = new GoogleChartData(array(null));
+// 			//$chart->addData($data);
+// 			//$chart->addData($data2);
+
+// 			// 			foreach($sites as $site){
+// 			// 				$chart->addData($chartDatas[$site]);
+// 			// 			}
 
 
 
-			// 			$xcount = count($valsByDate);
-			// 			$xLabelPos = array();
+// 			//$data = new GoogleChartData(array(0,10,20,30,32,38,50,0,-2,0,0,0,0,1,2,3,4,5,6,7,8,9,10));
 
-			// 			$dates = array_keys($valsByDate);
-			// 			for($l = 0; $l < $xcount; $l++){
-			// 				$xLabelPos[$l] = $l *  100 / ($xcount - 1);
-				// 				$d = date_parse($dates[$l]);
-				// 				if($d['month'] == 3)
-				// 					$xlbl[] = array('Mar', $xLabelPos[$l]);
-				// 			}
+// 			//$data->setAutoscale(false);
+// 			//$chart->addData($data);
+// 			// 			$chart->addData($chartDatas[$sites[0]]);
+// 			// 			$chart->addData($chartDatas[$sites[1]]);
+// 			// 			$chart->addData($chartDatas[$sites[2]]);
+// 			// 			$chart->addData($chartDatas[$sites[3]]);
 
-				// customize x axis
-				$x_axis = new GoogleChartAxis('x');
-				$x_axis->setTickMarks(5);
-				$x_axis->setLabels($xlbl);
-				$x_axis->setLabelPositions($xlblpos);
-				//$x_axis->set
-				$chart->addAxis($x_axis);
 
-				$x2_axis = new GoogleChartAxis('x');
-				//$x2_axis->setTickMarks(5);
-				$x2_axis->setLabels($x2lbl);
-				$x2_axis->setLabelPositions($x2lblpos);
-				$chart->addAxis($x2_axis);
 
-				// add a shape marker with a border
-				foreach($chartDatas as $site => $data){
-					$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
-					$shape_marker->setSize(3);
-					$shape_marker->setBorder(0);
-					$shape_marker->setData($data);
-					$shape_marker->setColor($data->getColor());
-					$chart->addMarker($shape_marker);
-				}
+// 			// 			$xcount = count($valsByDate);
+// 			// 			$xLabelPos = array();
 
-				// add QA lines if configured
-				if(isset($context['sandbox']['paramConfig']) && isset($context['sandbox']['paramConfig'][$parameter])){
-					$pc = $context['sandbox']['paramConfig'];
-					if(isset($pc[$parameter]['QALINE'])){
-						foreach($pc[$parameter]['QALINE'] as $pcline){
+// 			// 			$dates = array_keys($valsByDate);
+// 			// 			for($l = 0; $l < $xcount; $l++){
+// 			// 				$xLabelPos[$l] = $l *  100 / ($xcount - 1);
+// 				// 				$d = date_parse($dates[$l]);
+// 				// 				if($d['month'] == 3)
+// 				// 					$xlbl[] = array('Mar', $xLabelPos[$l]);
+// 				// 			}
 
-							if($pcline > $paramValMax || $pcline < $paramValMin)
-							continue;
+// 				// customize x axis
+// 				$x_axis = new GoogleChartAxis('x');
+// 				$x_axis->setTickMarks(5);
+// 				$x_axis->setLabels($xlbl);
+// 				$x_axis->setLabelPositions($xlblpos);
+// 				//$x_axis->set
+// 				$chart->addAxis($x_axis);
 
-							// 		if($parameter == "H2O_pH" && $region == "MY")
-							// 			$ya = true;
-							$pcrange = $paramValMax - $paramValMin;
-							$pcpos = ($pcline - $paramValMin) / $pcrange;
+// 				$x2_axis = new GoogleChartAxis('x');
+// 				//$x2_axis->setTickMarks(5);
+// 				$x2_axis->setLabels($x2lbl);
+// 				$x2_axis->setLabelPositions($x2lblpos);
+// 				$chart->addAxis($x2_axis);
 
-							$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::HORIZ_LINE);
-							$shape_marker->setSize(1);
-							$shape_marker->setColor('FF0000');
-							$shape_marker->setPoint($pcpos);
-							$chart->addMarker($shape_marker);
+// 				// add a shape marker with a border
+// 				foreach($chartDatas as $site => $data){
+// 					$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
+// 					$shape_marker->setSize(3);
+// 					$shape_marker->setBorder(0);
+// 					$shape_marker->setData($data);
+// 					$shape_marker->setColor($data->getColor());
+// 					$chart->addMarker($shape_marker);
+// 				}
 
-							// 									$line_marker = new GoogleChartRangeMarker();
-							// 									//if($paramValMin < 0)
-							// 									//$pcline = $pcline/$paramValMax
-							// 									$line_marker->setData(new GoogleChartData(array('6.5','7.5')));
-							// 									//$line_marker->setPoints(0,1);
-							// 									$line_marker->setSize(1);
-							// 									$line_marker->setColor('ff0000');
-							// 									$chart->addMarker($line_marker);
-						}
-					}
-					//foreach($paramConfig)
-				}
+// 				// add QA lines if configured
+// 				if(isset($context['sandbox']['paramConfig']) && isset($context['sandbox']['paramConfig'][$parameter])){
+// 					$pc = $context['sandbox']['paramConfig'];
+// 					if(isset($pc[$parameter]['QALINE'])){
+// 						foreach($pc[$parameter]['QALINE'] as $pcline){
+
+// 							if($pcline > $paramValMax || $pcline < $paramValMin)
+// 							continue;
+
+// 							// 		if($parameter == "H2O_pH" && $region == "MY")
+// 							// 			$ya = true;
+// 							$pcrange = $paramValMax - $paramValMin;
+// 							$pcpos = ($pcline - $paramValMin) / $pcrange;
+
+// 							$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::HORIZ_LINE);
+// 							$shape_marker->setSize(1);
+// 							$shape_marker->setColor('FF0000');
+// 							$shape_marker->setPoint($pcpos);
+// 							$chart->addMarker($shape_marker);
+
+// 							// 									$line_marker = new GoogleChartRangeMarker();
+// 							// 									//if($paramValMin < 0)
+// 							// 									//$pcline = $pcline/$paramValMax
+// 							// 									$line_marker->setData(new GoogleChartData(array('6.5','7.5')));
+// 							// 									//$line_marker->setPoints(0,1);
+// 							// 									$line_marker->setSize(1);
+// 							// 									$line_marker->setColor('ff0000');
+// 							// 									$chart->addMarker($line_marker);
+// 						}
+// 					}
+// 					//foreach($paramConfig)
+// 				}
 					
-				// customize y axis
-				$y_axis = new GoogleChartAxis('y');
-				//$y_axis->setDrawTickMarks(false)->setLabels(array(0,40,80));
-				//$y_axis->setLabels(array("min","zero","median","max"));
-				//$y_axis->setLabelPositions(-2,0,round($paramValMax/2,0),round($paramValMax));
-				$y_axis->setRange($paramValMin, $paramValMax);
-				$chart->addAxis($y_axis);
+// 				// customize y axis
+// 				$y_axis = new GoogleChartAxis('y');
+// 				//$y_axis->setDrawTickMarks(false)->setLabels(array(0,40,80));
+// 				//$y_axis->setLabels(array("min","zero","median","max"));
+// 				//$y_axis->setLabelPositions(-2,0,round($paramValMax/2,0),round($paramValMax));
+// 				$y_axis->setRange($paramValMin, $paramValMax);
+// 				$chart->addAxis($y_axis);
 
-				$y2_axis = new GoogleChartAxis('y');
-				$y2_axis->setLabels(array("",$unit));
-				$chart->addAxis($y2_axis);
-
-
-				// 			// add a shape marker with a border
-				// 			$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
-				// 			$shape_marker->setSize(6);
-				// 			$shape_marker->setBorder(2);
-				// 			$shape_marker->setData($data2);
-				// 			$chart->addMarker($shape_marker);
-
-				// 			// add a value marker
-				// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
-				// 			$value_marker->setData($data);
-				// 			$chart->addMarker($value_marker);
-
-				// 			// add a value marker
-				// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
-				// 			$value_marker->setData($data2);
-				// 			$chart->addMarker($value_marker);
+// 				$y2_axis = new GoogleChartAxis('y');
+// 				$y2_axis->setLabels(array("",$unit));
+// 				$chart->addAxis($y2_axis);
 
 
-				//echo _embed($chart->getImage() , "image/png");
+// 				// 			// add a shape marker with a border
+// 				// 			$shape_marker = new GoogleChartShapeMarker(GoogleChartShapeMarker::CIRCLE);
+// 				// 			$shape_marker->setSize(6);
+// 				// 			$shape_marker->setBorder(2);
+// 				// 			$shape_marker->setData($data2);
+// 				// 			$chart->addMarker($shape_marker);
 
-				//echo $chart->toHtml();
+// 				// 			// add a value marker
+// 				// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
+// 				// 			$value_marker->setData($data);
+// 				// 			$chart->addMarker($value_marker);
 
-				//echo "ERROR: could not create directory";
-				$yes = ($parameter == "H2O_pH" && $region == "MY");
-				if($yes)
-				{
-					$chartquery = $chart->getQuery();
-				}
-				$image = $chart->getImage();
-				$dir = "public://charts";
-				file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-				$tag = "time_{$region}_{$parameter}";
-				$filename = "{$tag}.png";
-				$file = file_save_data($image, "public://charts/{$filename}",FILE_EXISTS_REPLACE );
-				image_path_flush("public://charts/{$filename}");
+// 				// 			// add a value marker
+// 				// 			$value_marker = new GoogleChartTextMarker(GoogleChartTextMarker::VALUE);
+// 				// 			$value_marker->setData($data2);
+// 				// 			$chart->addMarker($value_marker);
+
+
+// 				//echo _embed($chart->getImage() , "image/png");
+
+// 				//echo $chart->toHtml();
+
+// 				//echo "ERROR: could not create directory";
+// 				$yes = ($parameter == "H2O_pH" && $region == "MY");
+// 				if($yes)
+// 				{
+// 					$chartquery = $chart->getQuery();
+// 				}
+// 				$image = $chart->getImage();
+// 				$dir = "public://charts";
+// 				file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+// 				$tag = "time_{$region}_{$parameter}";
+// 				$filename = "{$tag}.png";
+// 				$file = file_save_data($image, "public://charts/{$filename}",FILE_EXISTS_REPLACE );
+// 				image_path_flush("public://charts/{$filename}");
+				
+// 				////  END GOOGLE MAP
+				
+				
 
 				//print_r();
 				//break;
@@ -1143,8 +1149,12 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				$data->field_ref_region[$lang][0]['nid'] = $region_nid;
 				//$region_node = node_load($region_nid);
 
+				$data->field_stationcat[$lang][0]['value'] = $region;
+				
 				$data->field_file = $autogen->field_file;
-				$data->field_chart[$lang][0]['fid'] = $file->fid;
+				
+				// only used for pregenerated Google Map
+				//$data->field_chart[$lang][0]['fid'] = $file->fid;
 
 				$vid = db_query("select vid from {taxonomy_vocabulary} where machine_name = :name", array(":name" => 'years'))->fetchField();
 				//var_dump($vid);
@@ -1220,6 +1230,8 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				$datatable['import'] = array('tablefield_csv_field_data_table_0' => '', 'rebuild_field_data_table_0' => 'Upload CSV');
 
 				$data->field_data_table[$lang][0]['value'] = serialize($datatable);
+				
+				
 				//var_dump($data);
 
 

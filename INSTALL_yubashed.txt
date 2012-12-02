@@ -3,6 +3,7 @@ git clone ssh://git@thosmos.com:3722/yubashed_db.git
 
 cd yubashed
 cp sites/default/settings-dev.php sites/default/settings.php
+#edit settings.php to set db location
 cp htaccess .htaccess
 tar xzf files-xxxxxxxxx.tgz 
 mv files sites/default
