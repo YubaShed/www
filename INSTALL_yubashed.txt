@@ -1,0 +1,18 @@
+git clone ssh://git@thosmos.com:3722/yubashed.git
+git clone ssh://git@thosmos.com:3722/yubashed_db.git
+
+cd yubashed
+cp sites/default/settings-dev.php sites/default/settings.php
+cp htaccess .htaccess
+tar xzf files-xxxxxxxxx.tgz 
+mv files sites/default
+
+
+#install drush
+curl http://pear.php.net/go-pear.phar > go-pear.php
+php -q go-pear.php
+#add /path/to/pear/bin to $PATH
+pear channel-discover pear.drush.org
+pear install drush/drush
+
+
