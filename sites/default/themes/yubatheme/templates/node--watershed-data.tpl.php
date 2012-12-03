@@ -91,30 +91,35 @@
   
 <?php
 drupal_add_library('system', 'ui.tabs');
-//drupal_add_js('http://maps.googleapis.com/maps/api/js?key=AIzaSyBEsRU9fWQRM8Y4bhvn4uWsoGWVUkVZxkA&sensor=false','external');
-drupal_add_js('jQuery(document).ready(function(){jQuery("#datatabs").tabs(); });', 'inline');
-//drupal_add_js('jQuery(document).ready(function(){jQuery("#datatabs").tabs(); window.onload = loadScript;});', 'inline');
-//drupal_add_js('sites/default/themes/yubatheme/datamap.js',array('type' => 'file', 'group' => 'JS_THEME'));
-//{select: function(event, ui) {chart.invalidateSize();}}
-drupal_add_css('#datatabs { width: 100%: } #datatabs .tab { height: 350px; width: 100% } .ui-tabs .ui-tabs-panel { padding: 1em 0; }','inline');
+////drupal_add_js('http://maps.googleapis.com/maps/api/js?key=AIzaSyBEsRU9fWQRM8Y4bhvn4uWsoGWVUkVZxkA&sensor=false','external');
+//drupal_add_js('jQuery(document).ready(function(){jQuery("#datatabs").tabs(); });', 'inline');
+
+////drupal_add_js('sites/default/themes/yubatheme/datamap.js',array('type' => 'file', 'group' => 'JS_THEME'));
+////{select: function(event, ui) {chart.invalidateSize();}}
+//drupal_add_css('#datatabs { width: 100%: } #datatabs .tab { height: 350px; width: 100% } .ui-tabs .ui-tabs-panel { padding: 1em 0; }','inline');
 drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.theme.css','file');
-//drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.tabs.css','file');
-//drupal_add_css('sites/default/themes/yubatheme/css/colors.css','file');
-//drupal_add_css('#logo img {padding: 15px 0 0 0;}');
-//drupal_add_css('.ui-tabs .ui-tabs-panel { padding: 1em 0; }');
+////drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.tabs.css','file');
+////drupal_add_css('sites/default/themes/yubatheme/css/colors.css','file');
+////drupal_add_css('#logo img {padding: 15px 0 0 0;}');
+////drupal_add_css('.ui-tabs .ui-tabs-panel { padding: 1em 0; }');
 ?>
-<div id="datatabs">
+<!-- <div id="datatabs">
     <ul>
         <li><a href="#charttab">Chart</a></li>
         <li><a href="#maptab">Map</a></li>
     </ul>
-    <div id="charttab" class="tab">
-    </div>
-    <div id="maptab" class="tab">
-    <iframe width="100%" height="340" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;ll=37.269174,-119.306607&amp;spn=10.118071,19.753418&amp;t=h&amp;z=6&amp;output=embed"></iframe><br /><small><a href="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;ll=37.269174,-119.306607&amp;spn=10.118071,19.753418&amp;t=h&amp;z=6&amp;source=embed" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+-->
+    <div id="maptab" style="width: 100%; height: 340px;">
+    <iframe width="100%" height="340" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;ll=37.269174,-119.306607&amp;spn=10.118071,19.753418&amp;t=h&amp;z=9&amp;output=embed"></iframe>
     
+    </div><br/>
+
+    <div id="charttab" style="width: 100%; height: 410px;">
     </div>
-</div>
+    <!-- 
+    <br /><small><a href="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;ll=37.269174,-119.306607&amp;spn=10.118071,19.753418&amp;t=h&amp;z=6&amp;source=embed" style="color:#0000FF;text-align:left">View Larger Map</a></small>
+     -->
+<!-- </div>  -->
 
   <!--<div id="chartdiv" style="width:100%; height:400px;"></div> -->
 
@@ -129,10 +134,10 @@ drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.theme.css','file');
     // drupal_add_js($path . '/example.js');
 
     drupal_add_js($path ."/amcharts.js");
-    $imgPath = $path . "/images/";
+    $imgPath = '/yubashed/' . $path . "/images/";
 
 
-    //var_dump($field_data_table[0]['tabledata']);
+    //var_dump($field_data_table);
 
     $datas = $field_data_table[0]['tabledata'];
     $numDatas = count($datas);
@@ -234,10 +239,9 @@ foreach($xdates as $xdate) {
 }
 echo "];";
 
-
-
 ?>
 
+var lastIndex = -1;
 
 AmCharts.ready(function () {
     // SERIAL CHART
@@ -251,6 +255,26 @@ AmCharts.ready(function () {
         backgroundColor: '#000000',
         backgroundAlpha: 0.15
     };
+
+    chart.addListener("changed", function(e) {
+        //{type:"changed", index:Number, zooming:Boolean, chart:AmChart}
+        //var index = e.index;
+        if(e.index != lastIndex)
+        {
+            lastIndex = e.index;
+            //console.log("index: " + e.index + ", date: " + chartData[e.index].date + ", val0: " + chartData[e.index].val0 + ", val1: " + chartData[e.index].val1 + ", val2: " + chartData[e.index].val2 + ", val3: " + chartData[e.index].val3);
+            var logStr = "index: " + e.index + ", date: " + chartData[e.index].date <?php 
+   			// loop through sites and add valnames to log string
+   			for($s = 0; $s < $numSites; $s++){
+   			   $valName = $valNames[$s];
+   			   echo ' + ", ' . $valName . ': " + chartData[e.index]["' . $valName . '"]';
+  			}
+  			echo ';';
+   			?>
+
+		console.log(logStr);
+        }
+    });
 
     var legend = new AmCharts.AmLegend();
     chart.addLegend(legend);
@@ -272,6 +296,10 @@ AmCharts.ready(function () {
     valueAxis.title = "<?php echo $paramName; ?>";
     valueAxis.titleBold = false;
     chart.addValueAxis(valueAxis);
+
+    // SCROLLBAR
+    var chartScrollbar = new AmCharts.ChartScrollbar();
+    chart.addChartScrollbar(chartScrollbar);
 
     <?php 
     for($s = 0; $s < $numSites; $s++){
@@ -342,7 +370,7 @@ AmCharts.ready(function () {
   
   <?php 
       //var_dump($field_data_table);
-      var_dump($field_data_table[0]['tabledata']);
+      //var_dump($field_data_table[0]['tabledata']);
 
   ?>
 
