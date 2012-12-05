@@ -89,40 +89,142 @@
   <?php print render($title_suffix); ?>
   
   
-<?php
-drupal_add_library('system', 'ui.tabs');
-////drupal_add_js('http://maps.googleapis.com/maps/api/js?key=AIzaSyBEsRU9fWQRM8Y4bhvn4uWsoGWVUkVZxkA&sensor=false','external');
-//drupal_add_js('jQuery(document).ready(function(){jQuery("#datatabs").tabs(); });', 'inline');
 
+
+<?php
+
+//var_dump($field_data_table);
+
+if(isset($field_data_table[0]['tabledata'])){
+
+//drupal_add_library('system', 'ui.tabs');
+//drupal_add_js('http://maps.googleapis.com/maps/api/js?key=AIzaSyBEsRU9fWQRM8Y4bhvn4uWsoGWVUkVZxkA&sensor=false','external');
+//drupal_add_js('jQuery(document).ready(function(){jQuery("#datatabs").tabs(); });', 'inline');
+drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
+drupal_add_js('http://d3js.org/d3.v2.js','external');
 ////drupal_add_js('sites/default/themes/yubatheme/datamap.js',array('type' => 'file', 'group' => 'JS_THEME'));
 ////{select: function(event, ui) {chart.invalidateSize();}}
 //drupal_add_css('#datatabs { width: 100%: } #datatabs .tab { height: 350px; width: 100% } .ui-tabs .ui-tabs-panel { padding: 1em 0; }','inline');
-drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.theme.css','file');
+drupal_add_css('sites/default/themes/yubatheme/yubatheme.css','file');
+//drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.theme.css','file');
 ////drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.tabs.css','file');
 ////drupal_add_css('sites/default/themes/yubatheme/css/colors.css','file');
 ////drupal_add_css('#logo img {padding: 15px 0 0 0;}');
 ////drupal_add_css('.ui-tabs .ui-tabs-panel { padding: 1em 0; }');
 ?>
-<!-- <div id="datatabs">
-    <ul>
-        <li><a href="#charttab">Chart</a></li>
-        <li><a href="#maptab">Map</a></li>
-    </ul>
--->
-    <div id="maptab" style="width: 100%; height: 340px;">
-    <iframe width="100%" height="340" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;ll=37.269174,-119.306607&amp;spn=10.118071,19.753418&amp;t=h&amp;z=9&amp;output=embed"></iframe>
+
+    <div id="maptab" style="width: 100%; height: 340px;"></div><br/>
+
+    <div id="charttab" style="width: 100%; height: 410px;"></div>
     
-    </div><br/>
+    
+    <script type="text/javascript">
 
-    <div id="charttab" style="width: 100%; height: 410px;">
-    </div>
-    <!-- 
-    <br /><small><a href="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;ll=37.269174,-119.306607&amp;spn=10.118071,19.753418&amp;t=h&amp;z=6&amp;source=embed" style="color:#0000FF;text-align:left">View Larger Map</a></small>
-     -->
-<!-- </div>  -->
+    var sites = [
+                 //{name: "test", nid: 1, lat: 37.76487, lon: -122.41948},
+                 //{nid: 486, name: "07 : Jackson Mdws", lat: 39.515839, lon: -120.563843},
+                 //{nid: 487, name: "08 : Plumbago Xing", lat: 39.438459, lon: -120.812336},
+                 //{nid: 488, name: "09 : Foote's Xing", lat: 39.416999, lon: -120.95288},
+                 //{nid: 516, name: "37 : Milton Reservior", lat: 39.522248, lon: -120.592387},
+                 //{nid: 533, name: "55 : Abv Oregon Ck", lat: 39.394239, lon: -121.083029},
+                 //{nid: 534, name: "56 : Our House", lat: 39.413122, lon: -120.995091}
 
-  <!--<div id="chartdiv" style="width:100%; height:400px;"></div> -->
+                 
+<?php 
 
+ if(isset($field_stationcat)) {
+
+	  $stationcat = $field_stationcat[0]["value"];
+	  
+	  $q = 'SELECT field_data_field_location.entity_id as nid, node.title as title, field_location_lat as lat, field_location_lon as lon 
+	  FROM node, field_data_field_location, field_data_field_stationcat 
+	  WHERE node.nid = field_data_field_location.entity_id 
+	  AND field_data_field_location.entity_id = field_data_field_stationcat.entity_id
+	  AND field_data_field_stationcat.field_stationcat_value = :stationcat;';
+	  
+	  $results = db_query($q, array(':stationcat' => $stationcat));
+	  
+	  foreach($results as $result) {
+	   
+	   echo "        {nid: {$result->nid}, title: '{$result->title}', lat: {$result->lat}, lon: {$result->lon} },\n";
+	   
+	  }
+ }
+
+	 //echo "        {nid: {$nid}, name: {$name}, lat: {$lat}, lon: {$lon} }\n";
+
+	 ?>
+
+                ];
+
+// Create the Google Map…
+var map = new google.maps.Map(d3.select("#maptab").node(), {
+  zoom: 10,
+  center: new google.maps.LatLng(39.438459, -120.812336),
+  mapTypeId: google.maps.MapTypeId.TERRAIN
+});
+
+
+var overlay = new google.maps.OverlayView();
+
+
+// Add the container when the overlay is added to the map.
+overlay.onAdd = function() {
+	console.log("overlay.onadd");
+
+	  var layer = d3.select(this.getPanes().overlayMouseTarget)
+	  .append("div")
+	  .attr("class", "stations");
+	  
+	    // Draw each marker as a separate SVG element.
+	    // We could use a single SVG, but what size would it have?
+	  overlay.draw = function() {
+	    var projection = this.getProjection(),
+	        padding = 10;
+
+	    var marker = layer.selectAll("svg")
+	        .data(sites)
+	        .each(transform) // update existing markers
+	      .enter().append("svg:svg")
+	        .each(transform)
+	        .attr("class", "marker");
+
+	    // Add a circle.
+	    marker.append("svg:circle")
+	        .attr("r", 4.5)
+	        .attr("cx", padding)
+	        .attr("cy", padding)
+	        .on("mouseover", function(e) { 
+		        // show text
+		        console.log("circle:hover");
+		     })
+		    .on("click", function(e) { console.log("click circle"); });
+
+	    // Add a label.
+	    marker.append("svg:text")
+	        .attr("x", padding + 7)
+	        .attr("y", padding)
+	        .attr("dy", ".31em")
+	        .text(function(d) { return d.title; })
+	        .on("click", function(e) { console.log("click text"); });
+
+	    function transform(d) {
+	      d = new google.maps.LatLng(d.lat, d.lon);
+	      d = projection.fromLatLngToDivPixel(d);
+	      return d3.select(this)
+	          .style("left", (d.x - padding) + "px")
+	          .style("top", (d.y - padding) + "px");
+	    }
+	  };
+
+
+};
+
+// Bind our overlay to the map…
+overlay.setMap(map);
+
+    </script>
+    
     <?php 
 
     $libname = 'amcharts';
@@ -333,7 +435,7 @@ AmCharts.ready(function () {
 });
 </script>
     
-    
+    <?php } // end auto-data section?>
 
   <?php if ($display_submitted): ?>
     <div class="meta submitted">

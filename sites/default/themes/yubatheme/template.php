@@ -111,7 +111,7 @@ function yubatheme_preprocess_node(&$variables) {
 	if (isset($variables['node']->type)) {
   	if($variables['node']->type == 'watershed_data') {
   		//drupal_add_js(path_to_theme() . '/watershed.js');
-  		drupal_add_js('http://www.google.com/jsapi');
+  		//drupal_add_js('http://www.google.com/jsapi');
   	}
 		//$variables['theme_hook_suggestions'][] = 'node__' . $variables['node']->type;
 		//$variables['node']->yippee = $variables['theme_hook_suggestions'][];
