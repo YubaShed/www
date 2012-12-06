@@ -165,6 +165,15 @@ var map = new google.maps.Map(d3.select("#maptab").node(), {
 });
 
 
+// Zoom and center the map to fit the markers
+var bounds = new google.maps.LatLngBounds();
+for (index in sites) {
+  var data = sites[index];
+  bounds.extend(new google.maps.LatLng(data.lat, data.lon));
+}
+map.fitBounds(bounds);
+
+
 var overlay = new google.maps.OverlayView();
 
 
@@ -194,11 +203,12 @@ overlay.onAdd = function() {
 	        .attr("r", 4.5)
 	        .attr("cx", padding)
 	        .attr("cy", padding)
+	        .attr("id", function(d) { return "circle_" + d.nid})
 	        .on("mouseover", function(e) { 
 		        // show text
 		        console.log("circle:hover");
 		     })
-		    .on("click", function(e) { console.log("click circle"); });
+		    .on("click", function(e) { console.log("click circle: " + e.nid); });
 
 	    // Add a label.
 	    marker.append("svg:text")
@@ -206,6 +216,7 @@ overlay.onAdd = function() {
 	        .attr("y", padding)
 	        .attr("dy", ".31em")
 	        .text(function(d) { return d.title; })
+	        .attr("id", function(d) { return "circle_" + d.nid})
 	        .on("click", function(e) { console.log("click text"); });
 
 	    function transform(d) {
@@ -228,18 +239,10 @@ overlay.setMap(map);
     <?php 
 
     $libname = 'amcharts';
-
     $path = libraries_get_path($libname);
-
-    // Do something with the library, knowing the path, for instance:
-
-    // drupal_add_js($path . '/example.js');
-
     drupal_add_js($path ."/amcharts.js");
-    $imgPath = '/yubashed/' . $path . "/images/";
+    $imgPath = $path . "/images/";
 
-
-    //var_dump($field_data_table);
 
     $datas = $field_data_table[0]['tabledata'];
     $numDatas = count($datas);
@@ -359,13 +362,15 @@ AmCharts.ready(function () {
     };
 
     chart.addListener("changed", function(e) {
-        //{type:"changed", index:Number, zooming:Boolean, chart:AmChart}
-        //var index = e.index;
-        if(e.index != lastIndex)
+
+    	//e == {type:"changed", index:Number, zooming:Boolean, chart:AmChart}
+
+    	if(e.index != lastIndex)
         {
             lastIndex = e.index;
             //console.log("index: " + e.index + ", date: " + chartData[e.index].date + ", val0: " + chartData[e.index].val0 + ", val1: " + chartData[e.index].val1 + ", val2: " + chartData[e.index].val2 + ", val3: " + chartData[e.index].val3);
-            var logStr = "index: " + e.index + ", date: " + chartData[e.index].date <?php 
+            var logStr = "index: " + e.index + ", date: " + chartData[e.index].date <?php
+             
    			// loop through sites and add valnames to log string
    			for($s = 0; $s < $numSites; $s++){
    			   $valName = $valNames[$s];
