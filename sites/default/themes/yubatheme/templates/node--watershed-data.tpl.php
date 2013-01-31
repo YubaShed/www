@@ -146,7 +146,7 @@ drupal_add_css('sites/default/themes/yubatheme/yubatheme.css','file');
 	  
 	  foreach($results as $result) {
 	   
-	   echo "        {nid: {$result->nid}, title: '{$result->title}', lat: {$result->lat}, lon: {$result->lon} },\n";
+	   echo "        {nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon} },\n";
 	   
 	  }
  }
