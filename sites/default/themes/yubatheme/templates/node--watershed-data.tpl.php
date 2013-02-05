@@ -118,6 +118,226 @@ drupal_add_css('sites/default/themes/yubatheme/yubatheme.css','file');
     <div id="charttab" style="width: 100%; height: 410px;"></div>
     
     
+    
+    <?php 
+
+    $libname = 'amcharts';
+    $path = libraries_get_path($libname);
+    drupal_add_js($path ."/amcharts.js");
+    $imgPath = $path . "/images/";
+
+
+    $datas = $field_data_table[0]['tabledata'];
+    $numDatas = count($datas);
+
+if(!isset($datas) || $numDatas == 0) {
+
+	continue;
+}
+
+$paramName = $field_ref_param[0]['node']->title;
+
+$start = new DateTime($datas[1][0]);
+
+//echo " start: " . $start->format("Y-m");
+
+$end = new DateTime($datas[$numDatas-1][0]);
+
+//echo " end: " . $end->format("Y-m");
+
+$diff = $start->diff($end);
+//echo " diff: " . $diff->format("%Y-%m");
+
+
+// get site and chart val names
+$numSites = count($datas[0]) - 1;
+$siteNames = array();
+$valNames = array();
+for($i = 0; $i < $numSites; $i++) {
+	$siteNames[] = $datas[0][$i + 1];
+	$valNames[] = "val" . $i;
+	//$valNamesC[] = $siteNames[$i];
+}
+
+
+// find number of months, inclusive, between first and last data point
+
+$numMonths = (($diff->y * 12) + $diff->m + 1);
+
+//echo " months: " . $numMonths;
+
+
+// var for incrementing start to get x axis dates
+$cur = clone $start;
+
+
+//var for holding x axis dates
+
+$xdates = array();
+
+
+
+// increment months, add to xdates[], and format for display
+
+for($i = 0; $i < $numMonths; $i++){
+
+	$xdates[$i] = $cur->format("Y-m");
+
+	$cur->add(new DateInterval('P1M'));
+
+}
+
+//generate javascript chart data array
+?>
+
+          <script type="text/javascript">
+            var chart;
+            var graph;
+
+            // note, some of the data points will be missing
+            var chartData = [
+              <?php 
+
+//$lastDate = 1;
+
+// cycle through xdates and create a chart data row
+foreach($xdates as $xdate) {
+
+	echo"{date: new Date('{$xdate}')";
+	
+	// cycle through data dates and add chart values if any exist for the current xdate
+  for($i = 1; $i < count($datas); $i++) {
+		if($datas[$i][0] == $xdate) {
+			//$lastDate = $datas[$i][0];
+			
+			// loop through sites and add values if they exist
+			for($s = 0; $s < $numSites; $s++){
+			  $valName = $valNames[$s];
+			  $xval = $datas[$i][$s + 1];
+				if($xval != "") {
+					echo "
+				        ,{$valName}: {$xval}";
+				}
+			}
+		}
+  }
+	echo "
+              },
+	            ";
+	
+}
+echo "];";
+
+?>
+
+var lastIndex = -1;
+var siteColors = [];
+
+//siteColors["test1"] = "#546546";
+
+AmCharts.ready(function () {
+    // SERIAL CHART
+    chart = new AmCharts.AmSerialChart();
+    chart.pathToImages = "<?php echo $imgPath; ?>";
+    chart.marginTop = 0;
+    chart.marginRight = 0;
+    chart.dataProvider = chartData;
+    chart.categoryField = "date";
+    chart.zoomOutButton = {
+        backgroundColor: '#000000',
+        backgroundAlpha: 0.15
+    };
+
+    chart.addListener("changed", function(e) {
+
+    	//e == {type:"changed", index:Number, zooming:Boolean, chart:AmChart}
+
+    	if(e.index != lastIndex)
+        {
+            lastIndex = e.index;
+            //console.log("index: " + e.index + ", date: " + chartData[e.index].date + ", val0: " + chartData[e.index].val0 + ", val1: " + chartData[e.index].val1 + ", val2: " + chartData[e.index].val2 + ", val3: " + chartData[e.index].val3);
+            var logStr = "index: " + e.index + ", date: " + chartData[e.index].date <?php
+             
+   			// loop through sites and add valnames to log string
+   			for($s = 0; $s < $numSites; $s++){
+   			   $valName = $valNames[$s];
+   			   echo ' + ", ' . $valName . ': " + chartData[e.index]["' . $valName . '"]';
+  			}
+  			echo ';';
+   			?>
+
+		console.log(logStr);
+        }
+    });
+
+    var legend = new AmCharts.AmLegend();
+    chart.addLegend(legend);
+
+    // AXES
+    // category
+    var categoryAxis = chart.categoryAxis;
+    categoryAxis.parseDates = true; // as our data is date-based, we set parseDates to true
+    categoryAxis.minPeriod = "MM"; // our data is monthly, so we set minPeriod to MM
+    categoryAxis.dashLength = 1;
+    categoryAxis.axisAlpha = .5;
+    categoryAxis.showLastLabel = false;
+
+    // value
+    var valueAxis = new AmCharts.ValueAxis();
+    valueAxis.axisAlpha = .5;
+    valueAxis.dashLength = 1;
+    valueAxis.inside = false;
+    valueAxis.title = "<?php echo $paramName; ?>";
+    valueAxis.titleBold = false;
+    chart.addValueAxis(valueAxis);
+
+    // SCROLLBAR
+    var chartScrollbar = new AmCharts.ChartScrollbar();
+    chart.addChartScrollbar(chartScrollbar);
+
+
+    <?php 
+    for($s = 0; $s < $numSites; $s++){
+
+    ?>
+    // GRAPH
+    graph = new AmCharts.AmGraph();
+    //graph.lineColor = "#b6d278";
+    //graph.negativeLineColor = "#487dac"; // this line makes the graph to change color when it drops below 0
+    graph.bullet = "round";
+    graph.bulletSize = 5;
+    graph.connect = false; // this makes the graph not to connect data points if data is missing
+    graph.lineThickness = 2;
+    graph.valueField = "<?php echo $valNames[$s]; ?>";
+    graph.title = "<?php echo $siteNames[$s]; ?>";
+    chart.addGraph(graph);
+    siteColors["<?php echo $siteNames[$s]; ?>"] = graph.lineColor;
+
+    //console.log("lineColor: " + graph.lineColor);
+    <?php 
+		}
+    ?>
+
+    // CURSOR  
+    var chartCursor = new AmCharts.ChartCursor();
+    chartCursor.cursorAlpha = .5;
+    chartCursor.cursorPosition = "mouse";
+    chartCursor.categoryBalloonDateFormat = "MMM YYYY";
+    chart.addChartCursor(chartCursor);
+
+    // WRITE
+    chart.write("charttab");
+    //chart.write("chartdiv");
+
+ // Bind our overlay to the map…
+    overlay.setMap(map);
+        
+});
+</script>
+    
+    
+    
+    
     <script type="text/javascript">
 
     var sites = [
@@ -204,7 +424,17 @@ overlay.onAdd = function() {
 	        .attr("cx", padding)
 	        .attr("cy", padding)
 	        .attr("id", function(d) { return "circle_" + d.nid})
-	        .on("mouseover", function(e) { 
+	        .attr("fill", function(d) { 
+		        var siteName = "Site " + d.title.substring(0, d.title.indexOf(" :"));
+		         //console.log("siteName: " + siteName + ", siteColor: " + siteColors[siteName]); 
+		        return siteColors[siteName];
+		        })
+	        .attr("stroke", function(d) { 
+		        var siteName = "Site " + d.title.substring(0, d.title.indexOf(" :"));
+		         //console.log("siteName: " + siteName + ", siteColor: " + siteColors[siteName]); 
+		        return siteColors[siteName];
+		        })
+		        .on("mouseover", function(e) { 
 		        // show text
 		        console.log("circle:hover");
 		     })
@@ -231,216 +461,16 @@ overlay.onAdd = function() {
 
 };
 
-// Bind our overlay to the map…
-overlay.setMap(map);
 
     </script>
     
-    <?php 
-
-    $libname = 'amcharts';
-    $path = libraries_get_path($libname);
-    drupal_add_js($path ."/amcharts.js");
-    $imgPath = $path . "/images/";
-
-
-    $datas = $field_data_table[0]['tabledata'];
-    $numDatas = count($datas);
-
-if(!isset($datas) || $numDatas == 0) {
-
-	continue;
-}
-
-$paramName = $field_ref_param[0]['node']->title;
-
-$start = new DateTime($datas[1][0]);
-
-//echo " start: " . $start->format("Y-m");
-
-$end = new DateTime($datas[$numDatas-1][0]);
-
-//echo " end: " . $end->format("Y-m");
-
-$diff = $start->diff($end);
-//echo " diff: " . $diff->format("%Y-%m");
-
-
-// get site and chart val names
-$numSites = count($datas[0]) - 1;
-$siteNames = array();
-$valNames = array();
-for($i = 0; $i < $numSites; $i++) {
-	$siteNames[] = $datas[0][$i + 1];
-	$valNames[] = "val" . $i;
-}
-
-
-// find number of months, inclusive, between first and last data point
-
-$numMonths = (($diff->y * 12) + $diff->m + 1);
-
-//echo " months: " . $numMonths;
-
-
-// var for incrementing start to get x axis dates
-$cur = clone $start;
-
-
-//var for holding x axis dates
-
-$xdates = array();
-
-
-
-// increment months, add to xdates[], and format for display
-
-for($i = 0; $i < $numMonths; $i++){
-
-	$xdates[$i] = $cur->format("Y-m");
-
-	$cur->add(new DateInterval('P1M'));
-
-}
-
-//generate javascript chart data array
-?>
-
-          <script type="text/javascript">
-            var chart;
-            var graph;
-
-            // note, some of the data points will be missing
-            var chartData = [
-              <?php 
-
-//$lastDate = 1;
-
-// cycle through xdates and create a chart data row
-foreach($xdates as $xdate) {
-
-	echo"{date: new Date('{$xdate}')";
-	
-	// cycle through data dates and add chart values if any exist for the current xdate
-  for($i = 1; $i < count($datas); $i++) {
-		if($datas[$i][0] == $xdate) {
-			//$lastDate = $datas[$i][0];
-			
-			// loop through sites and add values if they exist
-			for($s = 0; $s < $numSites; $s++){
-			  $valName = $valNames[$s];
-			  $xval = $datas[$i][$s + 1];
-				if($xval != "") {
-					echo "
-				        ,{$valName}: {$xval}";
-				}
-			}
-		}
-  }
-	echo "
-              },
-	            ";
-	
-}
-echo "];";
-
-?>
-
-var lastIndex = -1;
-
-AmCharts.ready(function () {
-    // SERIAL CHART
-    chart = new AmCharts.AmSerialChart();
-    chart.pathToImages = "<?php echo $imgPath; ?>";
-    chart.marginTop = 0;
-    chart.marginRight = 0;
-    chart.dataProvider = chartData;
-    chart.categoryField = "date";
-    chart.zoomOutButton = {
-        backgroundColor: '#000000',
-        backgroundAlpha: 0.15
-    };
-
-    chart.addListener("changed", function(e) {
-
-    	//e == {type:"changed", index:Number, zooming:Boolean, chart:AmChart}
-
-    	if(e.index != lastIndex)
-        {
-            lastIndex = e.index;
-            //console.log("index: " + e.index + ", date: " + chartData[e.index].date + ", val0: " + chartData[e.index].val0 + ", val1: " + chartData[e.index].val1 + ", val2: " + chartData[e.index].val2 + ", val3: " + chartData[e.index].val3);
-            var logStr = "index: " + e.index + ", date: " + chartData[e.index].date <?php
-             
-   			// loop through sites and add valnames to log string
-   			for($s = 0; $s < $numSites; $s++){
-   			   $valName = $valNames[$s];
-   			   echo ' + ", ' . $valName . ': " + chartData[e.index]["' . $valName . '"]';
-  			}
-  			echo ';';
-   			?>
-
-		console.log(logStr);
-        }
-    });
-
-    var legend = new AmCharts.AmLegend();
-    chart.addLegend(legend);
-
-    // AXES
-    // category
-    var categoryAxis = chart.categoryAxis;
-    categoryAxis.parseDates = true; // as our data is date-based, we set parseDates to true
-    categoryAxis.minPeriod = "MM"; // our data is monthly, so we set minPeriod to MM
-    categoryAxis.dashLength = 1;
-    categoryAxis.axisAlpha = .5;
-    categoryAxis.showLastLabel = false;
-
-    // value
-    var valueAxis = new AmCharts.ValueAxis();
-    valueAxis.axisAlpha = .5;
-    valueAxis.dashLength = 1;
-    valueAxis.inside = false;
-    valueAxis.title = "<?php echo $paramName; ?>";
-    valueAxis.titleBold = false;
-    chart.addValueAxis(valueAxis);
-
-    // SCROLLBAR
-    var chartScrollbar = new AmCharts.ChartScrollbar();
-    chart.addChartScrollbar(chartScrollbar);
-
-    <?php 
-    for($s = 0; $s < $numSites; $s++){
-
-    ?>
-    // GRAPH
-    graph = new AmCharts.AmGraph();
-    //graph.lineColor = "#b6d278";
-    //graph.negativeLineColor = "#487dac"; // this line makes the graph to change color when it drops below 0
-    graph.bullet = "round";
-    graph.bulletSize = 5;
-    graph.connect = false; // this makes the graph not to connect data points if data is missing
-    graph.lineThickness = 2;
-    graph.valueField = "<?php echo $valNames[$s]; ?>";
-    graph.title = "<?php echo $siteNames[$s]; ?>";
-    chart.addGraph(graph);
-    <?php 
-		}
-    ?>
-
-    // CURSOR  
-    var chartCursor = new AmCharts.ChartCursor();
-    chartCursor.cursorAlpha = .5;
-    chartCursor.cursorPosition = "mouse";
-    chartCursor.categoryBalloonDateFormat = "MMM YYYY";
-    chart.addChartCursor(chartCursor);
-
-    // WRITE
-    chart.write("charttab");
-    //chart.write("chartdiv");
-});
-</script>
     
-    <?php } // end auto-data section?>
+    <?php } // end watershed_data section?>
+    
+    
+    
+    
+    
 
   <?php if ($display_submitted): ?>
     <div class="meta submitted">

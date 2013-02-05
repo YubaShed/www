@@ -10,8 +10,6 @@
 }
 
 .stations circle {
-  fill: brown;
-  stroke: black;
   stroke-width: 1.5px;
 }
 
