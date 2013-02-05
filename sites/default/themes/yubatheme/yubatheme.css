@@ -3,9 +3,9 @@
 }
 
 .stations svg {
-  width: 60px;
-  height: 20px;
-  padding-right: 100px;
+  /*width: 60px;
+  height: 20px;*/
+  /*padding-right: 100px;*/
   font: 10px sans-serif;
 }
 
@@ -22,4 +22,25 @@
 }
 .stations text:hover {
 	cursor: default;
+}
+
+svg.marker text {
+	visibility:hidden;
+	width:auto;
+	height:auto;
+}
+
+svg.marker:hover text {
+	visibility:visible;
+	font-size:14px;
+	font-weight:bold;
+}
+
+svg.marker:hover {
+	background-color: white;
+	background-color: rgba(255,255,255,0.7);
+	border-radius: 5px;
+	padding: 5px;
+	width:auto;
+	height:auto;
 }
