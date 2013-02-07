@@ -396,7 +396,20 @@ map.fitBounds(bounds);
 
 var overlay = new google.maps.OverlayView();
 
+var infowindow = new google.maps.InfoWindow({
+    content: "test content"
+});
 
+
+//function setText(textElmt,str) {
+//	   textElmt.textContent = str;
+//	   var box = textElmt.getBBox();
+//	   var rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+//	   rect.setAttribute('class','yourCustomBackground');
+//	   for (var n in box) { rect.setAttribute(n,box[n]); }
+//	   textElmt.parentNode.insertBefore(rect,textElmt);
+//	}
+	
 // Add the container when the overlay is added to the map.
 overlay.onAdd = function() {
 	console.log("overlay.onadd");
@@ -438,18 +451,18 @@ overlay.onAdd = function() {
 		        // show text
 		        console.log("circle:hover");
 		     })
-		    .on("click", function(e) { console.log("click circle: " + e.nid); });
+		    .on("click", function(d) { 
+			    console.log("click circle: " + d.nid); 
 
-	    // Add a label.
-	    marker.append("svg:text")
-	        .attr("x", padding + 7)
-	        .attr("y", padding)
-	        .attr("dy", ".31em")
-	        .text(function(d) { return d.title; })
-	        .attr("id", function(d) { return "circle_" + d.nid})
-	        .on("click", function(e) { console.log("click text"); });
+			    infowindow.setContent(d.title);
+			    infowindow.setPosition(new google.maps.LatLng(d.lat, d.lon));
+			    infowindow.open(map);
+			    				    
+		    });
+
 
 	    function transform(d) {
+		   // var style = "width: " + getWidth(d.title);
 	      d = new google.maps.LatLng(d.lat, d.lon);
 	      d = projection.fromLatLngToDivPixel(d);
 	      return d3.select(this)
