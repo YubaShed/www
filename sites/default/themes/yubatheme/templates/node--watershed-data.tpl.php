@@ -366,7 +366,9 @@ AmCharts.ready(function () {
 	  
 	  foreach($results as $result) {
 	   
-	   echo "        {nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon} },\n";
+	   echo "        {nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" . 
+	   url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
+	   . "'},\n";
 	   
 	  }
  }
@@ -454,7 +456,8 @@ overlay.onAdd = function() {
 		    .on("click", function(d) { 
 			    console.log("click circle: " + d.nid); 
 
-			    infowindow.setContent(d.title);
+			    var content = '<a href="' + d.url + '">' + d.title + '</a>' ;
+			    infowindow.setContent(content);
 			    infowindow.setPosition(new google.maps.LatLng(d.lat, d.lon));
 			    infowindow.open(map);
 			    				    
