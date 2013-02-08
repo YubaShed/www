@@ -617,7 +617,8 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 		// get station ids for each stationcat
 		$q = 'SELECT field_data_field_id.entity_id as site_nid, field_data_field_stationcat.field_stationcat_value as stationcat, field_data_field_id.field_id_value as siteid
 			 						FROM field_data_field_id, field_data_field_stationcat, field_data_field_ref_organization 
-			 						WHERE field_data_field_id.entity_id = field_data_field_stationcat.entity_id 
+			 						WHERE field_data_field_id.bundle = "watershed_site" 
+			 						AND field_data_field_id.entity_id = field_data_field_stationcat.entity_id 
 			 						AND field_data_field_ref_organization.entity_id = field_data_field_stationcat.entity_id
 			 						AND field_data_field_ref_organization.field_ref_organization_nid = :org_nid
 			 						ORDER BY siteid, stationcat;';
