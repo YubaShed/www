@@ -252,14 +252,19 @@ function watershed_test_form_validate($form, &$form_state){
 	if ( arg(0) == 'node' && is_numeric(arg(1)) && ! arg(2) ) {
 		$autogen = node_load(arg(1));
 		// Do something with $node
-		//print_r( $node );
+		//print_r( $autogen );
+		//print_r($autogen->field_param_config['und'][0]['value']);
+		// parse autogen's param config and include any configs for this data type
+		//$parameter = "H2O DO";
+
+		
 
 	} else
 	form_set_error('watershed_test_form', t('Unable to recognize the node ID'));
 
 	echo "YeeHaa!!";
 
-	//form_set_error('watershed_test_form', t('Fake error'));
+	//form_set_error('watershed_test_form', t('Fake error to prevent running the batch'));
 }
 
 
@@ -320,6 +325,7 @@ function watershed_test_form_submit($form, &$form_state){
 	if($form_state['values']['line_param_regionsites_alltime']){
 		$batch['operations'][] = array('autogen_line_param_regionsites_alltime', array($autogen));
 	}
+	
 	// 	if($form_state['values']['line_param_allsites_alltime']){
 	// 		$batch['operations'][] = array('autogen_line_param_allsites_alltime', array($autogen));
 	// 	}
@@ -334,6 +340,7 @@ function watershed_test_form_submit($form, &$form_state){
 
 		batch_set($batch);
 
+	
 }
 
 /**
@@ -594,14 +601,13 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 	//drupal_set_message('autogen_line_param_regionsites_alltime!!');
 
 
-
 	$libname = 'googlechartphplib';
 	$path = libraries_get_path($libname);
 	// Do something with the library, knowing the path, for instance:
 	// drupal_add_js($path . '/example.js');
-	require_once($path ."/lib/GoogleChart.php");
-	require_once($path ."/lib/markers/GoogleChartShapeMarker.php");
-	require_once($path ."/lib/markers/GoogleChartTextMarker.php");
+	//require_once($path ."/lib/GoogleChart.php");
+	//require_once($path ."/lib/markers/GoogleChartShapeMarker.php");
+	//require_once($path ."/lib/markers/GoogleChartTextMarker.php");
 	//require_once($path ."/lib/markers/GoogleChartLineMarker.php");
 
 
@@ -1075,6 +1081,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				// replace or make the data node
 				$data = null;
 
+ 				$tag = "time_{$region}_{$parameter}";
 				$val = $tag;
 				$data_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_data' and field_id_value = :param", array(':param' => $val))->fetchField();
 				//echo "data_nid: {$data_nid} <br/>";
@@ -1112,6 +1119,19 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				$data->field_ref_metadata = $autogen->field_ref_metadata;
 				$data->field_ref_background = $autogen->field_ref_background;
 				$data->field_ref_organization = $autogen->field_ref_organization;
+				
+				// parse autogen's param config and include any configs for this data type
+				$chartConfigs = $autogen->field_param_config[$lang][0]['value'];
+         		$dataTypeConfigs = explode(";", $chartConfigs);
+         		
+         		foreach($dataTypeConfigs as $dtc){
+         		 $pcfgs = explode("|", trim($dtc));
+         		 if(trim($pcfgs[0]) == $parameter){
+         		  $data->field_param_config[$lang][0]['value'] = trim($pcfgs[1]) . " | " . trim($pcfgs[2]) . " ; ";
+         		  //echo "newconfig: " . trim($pcfgs[1]) . " | " . trim($pcfgs[2]);
+         		 }
+         		}
+				
 
 				// 			$data->field_ref_category[$lang][0]['nid'] = $autogen->field_ref_category[$lang][0]['nid'];
 				// 			$data->field_ref_metadata[$lang][0]['nid'] = $autogen->field_ref_metadata[$lang][0]['nid'];
@@ -1151,6 +1171,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				//$region_node = node_load($region_nid);
 
 				$data->field_stationcat[$lang][0]['value'] = $region;
+				
 				
 				$data->field_file = $autogen->field_file;
 				

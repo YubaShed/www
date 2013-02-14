@@ -318,6 +318,65 @@ AmCharts.ready(function () {
 		}
     ?>
 
+    var guide;
+    <?php 
+
+    //var_dump($nid);
+    //echo " YEEEAAAHHH\n\n";
+    //echo "paramConfigNid: " . $paramConfigNid . "\n\n";
+    
+    //var_dump($field_ref_param);
+    $paramConfig = $field_ref_param[0]['node']->field_chart_config['und'][0]['value'];
+    
+    //$q = 'SELECT field_param_config_value as value from field_data_field_param_config where entity_id = :nid;';
+    //$q = 'SELECT field_chart_config_value from field_data_field_chart_config where entity_id = :nid;';
+    
+    //echo "q: " . $q . "\n\n";
+    
+    //$paramConfig = db_query($q, array(':nid' => $paramConfigNid))->fetchField(0);
+    //var_dump($paramConfig);
+      
+//      $q = 'SELECT field_data_field_location.entity_id as nid, node.title as title, field_location_lat as lat, field_location_lon as lon
+//      FROM node, field_data_field_location, field_data_field_stationcat
+//      WHERE node.nid = field_data_field_location.entity_id
+//      AND field_data_field_location.entity_id = field_data_field_stationcat.entity_id
+//      AND field_data_field_stationcat.field_stationcat_value = :stationcat;';
+      
+//      $results = db_query($q, array(':stationcat' => $stationcat));
+      
+//      foreach($results as $result) {
+    
+//       echo "        {nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" .
+//       url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
+//       . "'},\n";
+    
+//      }
+     
+    
+//     $chartConfigs = $field_param_config[$lang][0]['value'];
+     $dataTypeConfigs = explode(";", $paramConfig);
+     
+    foreach($dataTypeConfigs as $dtc){
+     $pcfgs = explode("|", trim($dtc));
+     if(trim($pcfgs[0]) == 'QALINE'){
+      //echo "QALINE!: " . $pcfgs[1];
+      ?>
+
+      guide = new AmCharts.Guide();
+      guide.lineColor = 'red';
+      guide.lineAlpha = .5;
+      //guide.lineThickness = 2;
+      guide.value = "<?php echo trim($pcfgs[1]); ?>";
+      guide.label = "<?php echo trim($pcfgs[1]); ?>";
+      valueAxis.addGuide(guide);
+      
+      <?php 
+     }
+    }
+    
+    ?>
+    
+    
     // CURSOR  
     var chartCursor = new AmCharts.ChartCursor();
     chartCursor.cursorAlpha = .5;
@@ -341,13 +400,7 @@ AmCharts.ready(function () {
     <script type="text/javascript">
 
     var sites = [
-                 //{name: "test", nid: 1, lat: 37.76487, lon: -122.41948},
-                 //{nid: 486, name: "07 : Jackson Mdws", lat: 39.515839, lon: -120.563843},
-                 //{nid: 487, name: "08 : Plumbago Xing", lat: 39.438459, lon: -120.812336},
-                 //{nid: 488, name: "09 : Foote's Xing", lat: 39.416999, lon: -120.95288},
-                 //{nid: 516, name: "37 : Milton Reservior", lat: 39.522248, lon: -120.592387},
-                 //{nid: 533, name: "55 : Abv Oregon Ck", lat: 39.394239, lon: -121.083029},
-                 //{nid: 534, name: "56 : Our House", lat: 39.413122, lon: -120.995091}
+                 //{name: "01: Example Site", nid: 1, lat: 37.76487, lon: -122.41948},
 
                  
 <?php 
@@ -449,18 +502,13 @@ overlay.onAdd = function() {
 		         //console.log("siteName: " + siteName + ", siteColor: " + siteColors[siteName]); 
 		        return siteColors[siteName];
 		        })
-		        .on("mouseover", function(e) { 
+	        .on("mouseover", function(e) { 
 		        // show text
 		        console.log("circle:hover");
-		     })
-		    .on("click", function(d) { 
-			    console.log("click circle: " + d.nid); 
-
 			    var content = '<a href="' + d.url + '">' + d.title + '</a>' ;
 			    infowindow.setContent(content);
 			    infowindow.setPosition(new google.maps.LatLng(d.lat, d.lon));
 			    infowindow.open(map);
-			    				    
 		    });
 
 
