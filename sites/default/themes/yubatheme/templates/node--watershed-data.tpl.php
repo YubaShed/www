@@ -93,15 +93,9 @@
 
 <?php
 
-//var_dump($field_data_table);
-
-if(isset($field_data_table[0]['tabledata'])){
-
 //drupal_add_library('system', 'ui.tabs');
 //drupal_add_js('http://maps.googleapis.com/maps/api/js?key=AIzaSyBEsRU9fWQRM8Y4bhvn4uWsoGWVUkVZxkA&sensor=false','external');
 //drupal_add_js('jQuery(document).ready(function(){jQuery("#datatabs").tabs(); });', 'inline');
-drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
-drupal_add_js('http://d3js.org/d3.v2.js','external');
 ////drupal_add_js('sites/default/themes/yubatheme/datamap.js',array('type' => 'file', 'group' => 'JS_THEME'));
 ////{select: function(event, ui) {chart.invalidateSize();}}
 //drupal_add_css('#datatabs { width: 100%: } #datatabs .tab { height: 350px; width: 100% } .ui-tabs .ui-tabs-panel { padding: 1em 0; }','inline');
@@ -111,15 +105,29 @@ drupal_add_css('sites/default/themes/yubatheme/yubatheme.css','file');
 ////drupal_add_css('sites/default/themes/yubatheme/css/colors.css','file');
 ////drupal_add_css('#logo img {padding: 15px 0 0 0;}');
 ////drupal_add_css('.ui-tabs .ui-tabs-panel { padding: 1em 0; }');
-?>
 
-    <div id="maptab" style="width: 100%; height: 340px;"></div><br/>
 
-    <div id="charttab" style="width: 100%; height: 410px;"></div>
-    
-    
-    
-    <?php 
+//var_dump($field_data_table);
+
+$showMap = false;
+$showChart = false;
+
+if(count($field_stationcat) > 0) {
+ $showMap = true;
+ drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
+
+ echo '    <div id="maptab" style="width: 100%; height: 340px;"></div><br/> ';
+
+}
+
+if(isset($field_data_table[0]['tabledata'])){
+ $showChart = true;
+ drupal_add_js('http://d3js.org/d3.v2.js','external');
+
+ echo '    <div id="charttab" style="width: 100%; height: 410px; padding-top: 50px;"></div>  ';
+
+
+
 
     $libname = 'amcharts';
     $path = libraries_get_path($libname);
@@ -138,6 +146,9 @@ if(!isset($datas) || $numDatas == 0) {
 $paramName = $field_ref_param[0]['node']->title;
 
 $start = new DateTime($datas[1][0]);
+
+$hasDays = (count(explode("-",$start->format("Y-m-d"))) == 3);
+echo "<!--\n hasDays: ". count(explode("-",$start->format("Y-m-d"))) ."  \n start: " .$start->format("Y-m-d"). " \n  -->\n";
 
 //echo " start: " . $start->format("Y-m");
 
@@ -163,9 +174,9 @@ for($i = 0; $i < $numSites; $i++) {
 // find number of months, inclusive, between first and last data point
 
 $numMonths = (($diff->y * 12) + $diff->m + 1);
+$numDays = $diff->days + 1;
 
-//echo " months: " . $numMonths;
-
+echo "<!-- days: " . $numDays . "-->";
 
 // var for incrementing start to get x axis dates
 $cur = clone $start;
@@ -179,12 +190,16 @@ $xdates = array();
 
 // increment months, add to xdates[], and format for display
 
-for($i = 0; $i < $numMonths; $i++){
-
-	$xdates[$i] = $cur->format("Y-m");
-
-	$cur->add(new DateInterval('P1M'));
-
+if($hasDays){
+  for($i = 0; $i < $numDays; $i++){
+    $xdates[$i] = $cur->format("Y-m-d");
+    $cur->add(new DateInterval('P1D'));
+  }
+} else {
+  for($i = 0; $i < $numMonths; $i++){
+  	$xdates[$i] = $cur->format("Y-m");
+  	$cur->add(new DateInterval('P1M'));
+  }
 }
 
 //generate javascript chart data array
@@ -238,7 +253,7 @@ var siteColors = [];
 AmCharts.ready(function () {
     // SERIAL CHART
     chart = new AmCharts.AmSerialChart();
-    chart.pathToImages = "<?php echo $imgPath; ?>";
+    chart.pathToImages = "<?php echo url($imgPath, array('absolute' => TRUE)); ?>";
     chart.marginTop = 0;
     chart.marginRight = 0;
     chart.dataProvider = chartData;
@@ -277,7 +292,11 @@ AmCharts.ready(function () {
     // category
     var categoryAxis = chart.categoryAxis;
     categoryAxis.parseDates = true; // as our data is date-based, we set parseDates to true
+    <?php if($hasDays) { ?>
+    categoryAxis.minPeriod = "DD"; // our data is monthly, so we set minPeriod to MM
+    <?php } else {?>
     categoryAxis.minPeriod = "MM"; // our data is monthly, so we set minPeriod to MM
+    <?php } ?>
     categoryAxis.dashLength = 1;
     categoryAxis.axisAlpha = .5;
     categoryAxis.showLastLabel = false;
@@ -381,7 +400,11 @@ AmCharts.ready(function () {
     var chartCursor = new AmCharts.ChartCursor();
     chartCursor.cursorAlpha = .5;
     chartCursor.cursorPosition = "mouse";
+    <?php if($hasDays) { ?>
+    chartCursor.categoryBalloonDateFormat = "MMM D, YYYY";
+    <?php } else {?>
     chartCursor.categoryBalloonDateFormat = "MMM YYYY";
+    <?php } ?>
     chart.addChartCursor(chartCursor);
 
     // WRITE
@@ -389,13 +412,14 @@ AmCharts.ready(function () {
     //chart.write("chartdiv");
 
  // Bind our overlay to the map…
+ if($showMap)
     overlay.setMap(map);
         
 });
 </script>
     
     
-    
+<?php if($showMap) { // begin if($showMap) section ?>
     
     <script type="text/javascript">
 
@@ -404,8 +428,6 @@ AmCharts.ready(function () {
 
                  
 <?php 
-
- if(isset($field_stationcat)) {
 
 	  $stationcat = $field_stationcat[0]["value"];
 	  
@@ -424,7 +446,6 @@ AmCharts.ready(function () {
 	   . "'},\n";
 	   
 	  }
- }
 
 	 //echo "        {nid: {$nid}, name: {$name}, lat: {$lat}, lon: {$lon} }\n";
 
@@ -527,6 +548,8 @@ overlay.onAdd = function() {
 
 
     </script>
+    
+    <?php } // if($showMap) section ?>
     
     
     <?php } // end watershed_data section?>
