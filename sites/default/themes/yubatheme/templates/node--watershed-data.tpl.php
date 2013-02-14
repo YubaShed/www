@@ -93,15 +93,9 @@
 
 <?php
 
-//var_dump($field_data_table);
-
-if(isset($field_data_table[0]['tabledata'])){
-
 //drupal_add_library('system', 'ui.tabs');
 //drupal_add_js('http://maps.googleapis.com/maps/api/js?key=AIzaSyBEsRU9fWQRM8Y4bhvn4uWsoGWVUkVZxkA&sensor=false','external');
 //drupal_add_js('jQuery(document).ready(function(){jQuery("#datatabs").tabs(); });', 'inline');
-drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
-drupal_add_js('http://d3js.org/d3.v2.js','external');
 ////drupal_add_js('sites/default/themes/yubatheme/datamap.js',array('type' => 'file', 'group' => 'JS_THEME'));
 ////{select: function(event, ui) {chart.invalidateSize();}}
 //drupal_add_css('#datatabs { width: 100%: } #datatabs .tab { height: 350px; width: 100% } .ui-tabs .ui-tabs-panel { padding: 1em 0; }','inline');
@@ -111,15 +105,29 @@ drupal_add_css('sites/default/themes/yubatheme/yubatheme.css','file');
 ////drupal_add_css('sites/default/themes/yubatheme/css/colors.css','file');
 ////drupal_add_css('#logo img {padding: 15px 0 0 0;}');
 ////drupal_add_css('.ui-tabs .ui-tabs-panel { padding: 1em 0; }');
-?>
 
-    <div id="maptab" style="width: 100%; height: 340px;"></div><br/>
 
-    <div id="charttab" style="width: 100%; height: 410px;"></div>
-    
-    
-    
-    <?php 
+//var_dump($field_data_table);
+
+$showMap = false;
+$showChart = false;
+
+if(count($field_stationcat) > 0) {
+ $showMap = true;
+ drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
+
+ echo '    <div id="maptab" style="width: 100%; height: 340px;"></div><br/> ';
+
+}
+
+if(isset($field_data_table[0]['tabledata'])){
+ $showChart = true;
+ drupal_add_js('http://d3js.org/d3.v2.js','external');
+
+ echo '    <div id="charttab" style="width: 100%; height: 410px; padding-top: 50px;"></div>  ';
+
+
+
 
     $libname = 'amcharts';
     $path = libraries_get_path($libname);
@@ -138,6 +146,9 @@ if(!isset($datas) || $numDatas == 0) {
 $paramName = $field_ref_param[0]['node']->title;
 
 $start = new DateTime($datas[1][0]);
+
+$hasDays = (count(explode("-",$start->format("Y-m-d"))) == 3);
+echo "<!--\n hasDays: ". count(explode("-",$start->format("Y-m-d"))) ."  \n start: " .$start->format("Y-m-d"). " \n  -->\n";
 
 //echo " start: " . $start->format("Y-m");
 
@@ -163,9 +174,9 @@ for($i = 0; $i < $numSites; $i++) {
 // find number of months, inclusive, between first and last data point
 
 $numMonths = (($diff->y * 12) + $diff->m + 1);
+$numDays = $diff->days + 1;
 
-//echo " months: " . $numMonths;
-
+echo "<!-- days: " . $numDays . "-->";
 
 // var for incrementing start to get x axis dates
 $cur = clone $start;
@@ -179,12 +190,16 @@ $xdates = array();
 
 // increment months, add to xdates[], and format for display
 
-for($i = 0; $i < $numMonths; $i++){
-
-	$xdates[$i] = $cur->format("Y-m");
-
-	$cur->add(new DateInterval('P1M'));
-
+if($hasDays){
+  for($i = 0; $i < $numDays; $i++){
+    $xdates[$i] = $cur->format("Y-m-d");
+    $cur->add(new DateInterval('P1D'));
+  }
+} else {
+  for($i = 0; $i < $numMonths; $i++){
+  	$xdates[$i] = $cur->format("Y-m");
+  	$cur->add(new DateInterval('P1M'));
+  }
 }
 
 //generate javascript chart data array
@@ -238,7 +253,7 @@ var siteColors = [];
 AmCharts.ready(function () {
     // SERIAL CHART
     chart = new AmCharts.AmSerialChart();
-    chart.pathToImages = "<?php echo $imgPath; ?>";
+    chart.pathToImages = "<?php echo url($imgPath, array('absolute' => TRUE)); ?>";
     chart.marginTop = 0;
     chart.marginRight = 0;
     chart.dataProvider = chartData;
@@ -277,7 +292,11 @@ AmCharts.ready(function () {
     // category
     var categoryAxis = chart.categoryAxis;
     categoryAxis.parseDates = true; // as our data is date-based, we set parseDates to true
+    <?php if($hasDays) { ?>
+    categoryAxis.minPeriod = "DD"; // our data is monthly, so we set minPeriod to MM
+    <?php } else {?>
     categoryAxis.minPeriod = "MM"; // our data is monthly, so we set minPeriod to MM
+    <?php } ?>
     categoryAxis.dashLength = 1;
     categoryAxis.axisAlpha = .5;
     categoryAxis.showLastLabel = false;
@@ -318,11 +337,74 @@ AmCharts.ready(function () {
 		}
     ?>
 
+    var guide;
+    <?php 
+
+    //var_dump($nid);
+    //echo " YEEEAAAHHH\n\n";
+    //echo "paramConfigNid: " . $paramConfigNid . "\n\n";
+    
+    //var_dump($field_ref_param);
+    $paramConfig = $field_ref_param[0]['node']->field_chart_config['und'][0]['value'];
+    
+    //$q = 'SELECT field_param_config_value as value from field_data_field_param_config where entity_id = :nid;';
+    //$q = 'SELECT field_chart_config_value from field_data_field_chart_config where entity_id = :nid;';
+    
+    //echo "q: " . $q . "\n\n";
+    
+    //$paramConfig = db_query($q, array(':nid' => $paramConfigNid))->fetchField(0);
+    //var_dump($paramConfig);
+      
+//      $q = 'SELECT field_data_field_location.entity_id as nid, node.title as title, field_location_lat as lat, field_location_lon as lon
+//      FROM node, field_data_field_location, field_data_field_stationcat
+//      WHERE node.nid = field_data_field_location.entity_id
+//      AND field_data_field_location.entity_id = field_data_field_stationcat.entity_id
+//      AND field_data_field_stationcat.field_stationcat_value = :stationcat;';
+      
+//      $results = db_query($q, array(':stationcat' => $stationcat));
+      
+//      foreach($results as $result) {
+    
+//       echo "        {nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" .
+//       url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
+//       . "'},\n";
+    
+//      }
+     
+    
+//     $chartConfigs = $field_param_config[$lang][0]['value'];
+     $dataTypeConfigs = explode(";", $paramConfig);
+     
+    foreach($dataTypeConfigs as $dtc){
+     $pcfgs = explode("|", trim($dtc));
+     if(trim($pcfgs[0]) == 'QALINE'){
+      //echo "QALINE!: " . $pcfgs[1];
+      ?>
+
+      guide = new AmCharts.Guide();
+      guide.lineColor = 'red';
+      guide.lineAlpha = .5;
+      //guide.lineThickness = 2;
+      guide.value = "<?php echo trim($pcfgs[1]); ?>";
+      guide.label = "<?php echo trim($pcfgs[1]); ?>";
+      valueAxis.addGuide(guide);
+      
+      <?php 
+     }
+    }
+    
+    ?>
+    
+    
     // CURSOR  
     var chartCursor = new AmCharts.ChartCursor();
     chartCursor.cursorAlpha = .5;
     chartCursor.cursorPosition = "mouse";
+    <?php if($hasDays) { ?>
+    chartCursor.categoryBalloonDateFormat = "MMM D, YYYY";
+    <?php } else {?>
     chartCursor.categoryBalloonDateFormat = "MMM YYYY";
+    <?php } ?>
     chart.addChartCursor(chartCursor);
 
     // WRITE
@@ -330,29 +412,22 @@ AmCharts.ready(function () {
     //chart.write("chartdiv");
 
  // Bind our overlay to the map…
+ if($showMap)
     overlay.setMap(map);
         
 });
 </script>
     
     
-    
+<?php if($showMap) { // begin if($showMap) section ?>
     
     <script type="text/javascript">
 
     var sites = [
-                 //{name: "test", nid: 1, lat: 37.76487, lon: -122.41948},
-                 //{nid: 486, name: "07 : Jackson Mdws", lat: 39.515839, lon: -120.563843},
-                 //{nid: 487, name: "08 : Plumbago Xing", lat: 39.438459, lon: -120.812336},
-                 //{nid: 488, name: "09 : Foote's Xing", lat: 39.416999, lon: -120.95288},
-                 //{nid: 516, name: "37 : Milton Reservior", lat: 39.522248, lon: -120.592387},
-                 //{nid: 533, name: "55 : Abv Oregon Ck", lat: 39.394239, lon: -121.083029},
-                 //{nid: 534, name: "56 : Our House", lat: 39.413122, lon: -120.995091}
+                 //{name: "01: Example Site", nid: 1, lat: 37.76487, lon: -122.41948},
 
                  
 <?php 
-
- if(isset($field_stationcat)) {
 
 	  $stationcat = $field_stationcat[0]["value"];
 	  
@@ -371,7 +446,6 @@ AmCharts.ready(function () {
 	   . "'},\n";
 	   
 	  }
- }
 
 	 //echo "        {nid: {$nid}, name: {$name}, lat: {$lat}, lon: {$lon} }\n";
 
@@ -449,18 +523,13 @@ overlay.onAdd = function() {
 		         //console.log("siteName: " + siteName + ", siteColor: " + siteColors[siteName]); 
 		        return siteColors[siteName];
 		        })
-		        .on("mouseover", function(e) { 
+	        .on("mouseover", function(e) { 
 		        // show text
 		        console.log("circle:hover");
-		     })
-		    .on("click", function(d) { 
-			    console.log("click circle: " + d.nid); 
-
 			    var content = '<a href="' + d.url + '">' + d.title + '</a>' ;
 			    infowindow.setContent(content);
 			    infowindow.setPosition(new google.maps.LatLng(d.lat, d.lon));
 			    infowindow.open(map);
-			    				    
 		    });
 
 
@@ -479,6 +548,8 @@ overlay.onAdd = function() {
 
 
     </script>
+    
+    <?php } // if($showMap) section ?>
     
     
     <?php } // end watershed_data section?>
