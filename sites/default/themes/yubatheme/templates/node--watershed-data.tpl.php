@@ -521,9 +521,9 @@ overlay.onAdd = function() {
 		         //console.log("siteName: " + siteName + ", siteColor: " + siteColors[siteName]); 
 		        return siteColors[siteName];
 		        })
-	        .on("mouseover", function(e) { 
+	        .on("mouseover", function(d) { 
 		        // show text
-		        console.log("circle:hover");
+		        //console.log("circle:hover");
 			    var content = '<a href="' + d.url + '">' + d.title + '</a>' ;
 			    infowindow.setContent(content);
 			    infowindow.setPosition(new google.maps.LatLng(d.lat, d.lon));
