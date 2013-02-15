@@ -127,8 +127,6 @@ if(isset($field_data_table[0]['tabledata'])){
  echo '    <div id="charttab" style="width: 100%; height: 410px; padding-top: 50px;"></div>  ';
 
 
-
-
     $libname = 'amcharts';
     $path = libraries_get_path($libname);
     drupal_add_js($path ."/amcharts.js");
@@ -185,7 +183,6 @@ $cur = clone $start;
 //var for holding x axis dates
 
 $xdates = array();
-
 
 
 // increment months, add to xdates[], and format for display
@@ -412,9 +409,10 @@ AmCharts.ready(function () {
     //chart.write("chartdiv");
 
  // Bind our overlay to the map…
- if($showMap)
+ <?php if($showMap) { ?>
     overlay.setMap(map);
-        
+ <?php } ?>
+    
 });
 </script>
     
