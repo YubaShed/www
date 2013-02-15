@@ -124,7 +124,7 @@ if(isset($field_data_table[0]['tabledata'])){
  $showChart = true;
  drupal_add_js('http://d3js.org/d3.v2.js','external');
 
- echo '    <div id="charttab" style="width: 100%; height: 410px; padding-top: 50px;"></div>  ';
+ echo '    <div id="charttab" style="width: 100%; height: 410px; "></div>  ';
 
 
     $libname = 'amcharts';
@@ -342,6 +342,10 @@ AmCharts.ready(function () {
     //echo "paramConfigNid: " . $paramConfigNid . "\n\n";
     
     //var_dump($field_ref_param);
+    
+    // BEGIN param_chart_config section
+    if(isset($field_ref_param[0]['node']->field_chart_config['und'])){
+     
     $paramConfig = $field_ref_param[0]['node']->field_chart_config['und'][0]['value'];
     
     //$q = 'SELECT field_param_config_value as value from field_data_field_param_config where entity_id = :nid;';
@@ -389,6 +393,7 @@ AmCharts.ready(function () {
       <?php 
      }
     }
+} // END param_chart_config section
     
     ?>
     
