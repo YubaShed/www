@@ -21,6 +21,23 @@
 	cursor: default;
 }
 
+svg.legend {
+	width:20px;
+	height:20px;
+	float:left;
+	clear:left;
+}
+
+p.legend {
+	float: left;
+}
+
+#stationcat-legend {
+	columnns: 3;
+	-webkit-columns:3; /* Safari and Chrome */
+	-moz-columns: 3; /* Firefox */
+	height: 200px;
+}
 /*
 .stations_ svg:hover {
 	background-color: white;
