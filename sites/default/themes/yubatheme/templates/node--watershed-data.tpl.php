@@ -145,7 +145,7 @@ $paramName = $field_ref_param[0]['node']->title;
 
 $start = new DateTime($datas[1][0]);
 
-$hasDays = (count(explode("-",$start->format("Y-m-d"))) == 3);
+$hasDays = (count(explode("-",$datas[1][0])) == 3);
 echo "<!--\n hasDays: ". count(explode("-",$start->format("Y-m-d"))) ."  \n start: " .$start->format("Y-m-d"). " \n  -->\n";
 
 //echo " start: " . $start->format("Y-m");
