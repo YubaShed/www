@@ -235,15 +235,6 @@ overlay.onAdd = function() {
 
 // Bind our overlay to the map…
 overlay.setMap(map);
-
-var legend = '<h3>Legend</h3><div id="stationcat-legend">';
-for(i=0; i<stationcats.length; i++) {
-	if (stationcats[i])
-		legend += '<svg class="legend"> <circle cx="10" cy="10" r="4.5" stroke="' + siteColors[i] + '" stroke-width="2" fill="' + siteColors[i] + '"/></svg><p class="legend">: ' + stationcats[i] + '</p>';
-}
-legend += '<p class="legend">Ex: SYT = South Yuba Tributaries</p><p class="legend">Ex: MS-Upper = Main Stem Upper</p></div>';
-document.write(legend);
-
     </script>
     
     

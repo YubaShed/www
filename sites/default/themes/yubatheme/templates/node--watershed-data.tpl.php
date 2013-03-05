@@ -508,7 +508,7 @@ overlay.onAdd = function() {
 	        .each(transform) // update existing markers
 	      .enter().append("svg:svg")
 	        .each(transform)
-	        .attr("class", "marker");
+    	    .attr("class", "marker")
 
 	    // Add a circle.
 	    marker.append("svg:circle")

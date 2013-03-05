@@ -28,33 +28,13 @@ svg.legend {
 	clear:left;
 }
 
-p.legend {
-	float: left;
+.page-viewdata.page-viewdata-sites .panel-col-first {
+	width: 20%;
+	margin-right:2%;
+	background-color: #fafafa;
+	padding:0 10px;
 }
 
-#stationcat-legend {
-	columnns: 3;
-	-webkit-columns:3; /* Safari and Chrome */
-	-moz-columns: 3; /* Firefox */
-	height: 200px;
+.page-viewdata.page-viewdata-sites .panel-col-last {
+	width: 74%;
 }
-/*
-.stations_ svg:hover {
-	background-color: white;
-	background-color: rgba(255,255,255,0.7);
-	border-radius: 5px;
-	margin:-5px;
-	padding: 5px;
-	z-index:999;
-}
-.stations_ svg:hover text {
-	display:block;
-	font-size:14px;
-	font-weight:bold;
-}
-
-
-.stations text:hover {
-	cursor: default;
-}
-*/
