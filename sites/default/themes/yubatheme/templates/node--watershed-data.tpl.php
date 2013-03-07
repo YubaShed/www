@@ -143,6 +143,11 @@ if(!isset($datas) || $numDatas == 0) {
 
 $paramName = $field_ref_param[0]['node']->title;
 
+// get y axis label if it exists
+if(isset($field_ref_param[0]['node']->field_y_axis_label['und'])){
+ $paramName = $field_ref_param[0]['node']->field_y_axis_label['und'][0]['value'];
+}
+
 $start = new DateTime($datas[1][0]);
 
 $hasDays = (count(explode("-",$datas[1][0])) == 3);
@@ -305,6 +310,7 @@ AmCharts.ready(function () {
     valueAxis.inside = false;
     valueAxis.title = "<?php echo $paramName; ?>";
     valueAxis.titleBold = false;
+    
     chart.addValueAxis(valueAxis);
 
     // SCROLLBAR
@@ -337,43 +343,14 @@ AmCharts.ready(function () {
     var guide;
     <?php 
 
-    //var_dump($nid);
-    //echo " YEEEAAAHHH\n\n";
-    //echo "paramConfigNid: " . $paramConfigNid . "\n\n";
     
-    //var_dump($field_ref_param);
+
+    
     
     // BEGIN param_chart_config section
     if(isset($field_ref_param[0]['node']->field_chart_config['und'])){
      
     $paramConfig = $field_ref_param[0]['node']->field_chart_config['und'][0]['value'];
-    
-    //$q = 'SELECT field_param_config_value as value from field_data_field_param_config where entity_id = :nid;';
-    //$q = 'SELECT field_chart_config_value from field_data_field_chart_config where entity_id = :nid;';
-    
-    //echo "q: " . $q . "\n\n";
-    
-    //$paramConfig = db_query($q, array(':nid' => $paramConfigNid))->fetchField(0);
-    //var_dump($paramConfig);
-      
-//      $q = 'SELECT field_data_field_location.entity_id as nid, node.title as title, field_location_lat as lat, field_location_lon as lon
-//      FROM node, field_data_field_location, field_data_field_stationcat
-//      WHERE node.nid = field_data_field_location.entity_id
-//      AND field_data_field_location.entity_id = field_data_field_stationcat.entity_id
-//      AND field_data_field_stationcat.field_stationcat_value = :stationcat;';
-      
-//      $results = db_query($q, array(':stationcat' => $stationcat));
-      
-//      foreach($results as $result) {
-    
-//       echo "        {nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" .
-//       url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
-//       . "'},\n";
-    
-//      }
-     
-    
-//     $chartConfigs = $field_param_config[$lang][0]['value'];
      $dataTypeConfigs = explode(";", $paramConfig);
      
     foreach($dataTypeConfigs as $dtc){
@@ -444,7 +421,7 @@ AmCharts.ready(function () {
 	  
 	  foreach($results as $result) {
 	   
-	   echo "        {nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" . 
+	   echo "        {nid: {$result->nid}, title: '" .htmlentities(ltrim($result->title, "0"), ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" . 
 	   url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
 	   . "'},\n";
 	   
