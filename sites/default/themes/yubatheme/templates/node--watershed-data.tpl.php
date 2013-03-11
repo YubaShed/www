@@ -93,21 +93,7 @@
 
 <?php
 
-//drupal_add_library('system', 'ui.tabs');
-//drupal_add_js('http://maps.googleapis.com/maps/api/js?key=AIzaSyBEsRU9fWQRM8Y4bhvn4uWsoGWVUkVZxkA&sensor=false','external');
-//drupal_add_js('jQuery(document).ready(function(){jQuery("#datatabs").tabs(); });', 'inline');
-////drupal_add_js('sites/default/themes/yubatheme/datamap.js',array('type' => 'file', 'group' => 'JS_THEME'));
-////{select: function(event, ui) {chart.invalidateSize();}}
-//drupal_add_css('#datatabs { width: 100%: } #datatabs .tab { height: 350px; width: 100% } .ui-tabs .ui-tabs-panel { padding: 1em 0; }','inline');
 drupal_add_css('sites/default/themes/yubatheme/yubatheme.css','file');
-//drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.theme.css','file');
-////drupal_add_css('sites/default/themes/yubatheme/css/jquery.ui.tabs.css','file');
-////drupal_add_css('sites/default/themes/yubatheme/css/colors.css','file');
-////drupal_add_css('#logo img {padding: 15px 0 0 0;}');
-////drupal_add_css('.ui-tabs .ui-tabs-panel { padding: 1em 0; }');
-
-
-//var_dump($field_data_table);
 
 $showMap = false;
 $showChart = false;
@@ -117,7 +103,6 @@ if(count($field_stationcat) > 0) {
  drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
 
  echo '    <div id="maptab" style="width: 100%; height: 340px;"></div><br/> ';
-
 }
 
 if(isset($field_data_table[0]['tabledata'])){
@@ -143,6 +128,7 @@ if(!isset($datas) || $numDatas == 0) {
 
 $paramName = $field_ref_param[0]['node']->title;
 
+
 // get y axis label if it exists
 if(isset($field_ref_param[0]['node']->field_y_axis_label['und'])){
  $paramName = $field_ref_param[0]['node']->field_y_axis_label['und'][0]['value'];
@@ -163,7 +149,7 @@ $diff = $start->diff($end);
 //echo " diff: " . $diff->format("%Y-%m");
 
 
-// get site and chart val names
+// get site and chart val names from the datatable
 $numSites = count($datas[0]) - 1;
 $siteNames = array();
 $valNames = array();
@@ -399,7 +385,9 @@ AmCharts.ready(function () {
 </script>
     
     
-<?php if($showMap) { // begin if($showMap) section ?>
+<?php if($showMap) { 
+ 
+ // begin if($showMap) section ?>
     
     <script type="text/javascript">
 
@@ -409,19 +397,38 @@ AmCharts.ready(function () {
                  
 <?php 
 
-	  $stationcat = $field_stationcat[0]["value"];
-	  
-	  $q = 'SELECT field_data_field_location.entity_id as nid, node.title as title, field_location_lat as lat, field_location_lon as lon 
-	  FROM node, field_data_field_location, field_data_field_stationcat 
+
+      //construct a query based on organization and the sites in the tabledata
+
+      $orgnid = $field_ref_organization[0]['nid'];
+      
+	  $q = 'SELECT node.nid as nid, field_id_value as siteid, node.title as title, field_location_lat as lat, field_location_lon as lon
+	  FROM node, field_data_field_id, field_data_field_location, field_data_field_ref_organization 
 	  WHERE node.nid = field_data_field_location.entity_id 
-	  AND field_data_field_location.entity_id = field_data_field_stationcat.entity_id
-	  AND field_data_field_stationcat.field_stationcat_value = :stationcat;';
+	  AND node.nid = field_data_field_ref_organization.entity_id
+	  AND node.nid = field_data_field_id.entity_id
+	  AND field_data_field_ref_organization.field_ref_organization_nid = :orgnid
+	  AND (';
 	  
-	  $results = db_query($q, array(':stationcat' => $stationcat));
+	  // loop through the chart's siteNames and create query conditionals from them
+	  $siteids = array();
+      foreach($siteNames as $siteName){
+	   $sitebits = explode(" ", trim($siteName));
+	   $siteid = $sitebits[1];
+	    $q .= ' siteid = ' . $siteid . ' OR';
+	    array_push($siteids, $siteid);
+	  }	
+	  
+	  $q = rtrim($q,"OR");
+	    
+	  $q .= ');';
+	  
+	  
+	  $results = db_query($q, array(':orgnid' => $orgnid));
 	  
 	  foreach($results as $result) {
 	   
-	   echo "        {nid: {$result->nid}, title: '" .htmlentities(ltrim($result->title, "0"), ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" . 
+	   echo "        {nid: {$result->nid}, siteid: {$result->siteid}, title: '" .htmlentities(ltrim($result->title, "0"), ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" . 
 	   url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
 	   . "'},\n";
 	   
@@ -494,12 +501,12 @@ overlay.onAdd = function() {
 	        .attr("cy", padding)
 	        .attr("id", function(d) { return "circle_" + d.nid})
 	        .attr("fill", function(d) { 
-		        var siteName = "Site " + d.title.substring(0, d.title.indexOf(" :"));
+		        var siteName = "Site " + d.siteid;
 		         //console.log("siteName: " + siteName + ", siteColor: " + siteColors[siteName]); 
 		        return siteColors[siteName];
 		        })
 	        .attr("stroke", function(d) { 
-		        var siteName = "Site " + d.title.substring(0, d.title.indexOf(" :"));
+		        var siteName = "Site " + d.siteid;
 		         //console.log("siteName: " + siteName + ", siteColor: " + siteColors[siteName]); 
 		        return siteColors[siteName];
 		        })
