@@ -100,6 +100,7 @@
     <div id="maptab" style="width: 100%; height: 340px;"></div>    
     
     <script type="text/javascript">
+	//<![CDATA[
 
     var sites = [
                  //{name: "test", nid: 1, lat: 37.76487, lon: -122.41948},
@@ -113,13 +114,15 @@
                  
 <?php 
 
-	$q = 'select field_data_field_location.entity_id as nid, node.title as title, field_location_lat as lat, field_location_lon as lon, field_stationcat_value as stationcat from node, field_data_field_location, field_data_field_stationcat where node.nid = field_data_field_location.entity_id and node.nid = field_data_field_stationcat.entity_id;';
+	$q = 'select field_data_field_location.entity_id as nid, node.title as title, field_location_lat as lat, field_location_lon as lon, field_stationcat_value as stationcat, field_map_popup_value as popup from field_data_field_location, field_data_field_stationcat, node left join field_data_field_map_popup on node.nid = field_data_field_map_popup.entity_id where node.nid = field_data_field_location.entity_id and node.nid = field_data_field_stationcat.entity_id;';
 	  
 	$results = db_query($q);
 	  
 	foreach($results as $result) {
 	   
-	   echo "{nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, stationcat: '{$result->stationcat}', url: '" . 
+	   $popup = check_markup($result->popup, 'full_html');
+	   $cleanpopup = json_encode($popup);
+	   echo "{nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, stationcat: '{$result->stationcat}', popup: '{$cleanpopup}', url: '" . 
 	   url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
 	   . "'},\n";
 	}
@@ -130,6 +133,8 @@
 	 ?>
 
                 ];
+				
+				//]]>
 
 var stationcats = [];
 for (i=0; i < sites.length; i++) {
@@ -172,7 +177,8 @@ map.fitBounds(bounds);
 
 var overlay = new google.maps.OverlayView();
 var infowindow = new google.maps.InfoWindow({
-    content: "test content"
+    content: "",
+	maxWidth: "180px"
 });
 
 // Add the container when the overlay is added to the map.
@@ -212,10 +218,12 @@ overlay.onAdd = function() {
 				return siteColors[stationcatIndex];
 		     })
 		    .on("mouseover", function(d) { 
-			    var content = '<a href="' + d.url + '">' + d.title + '</a>' ;
+				var photo = d.popup.substr(5, d.popup.length - 8);
+			    var content = '<div class="popup-output"><a href="' + d.url + '">' + d.title + '</a><br />' + photo + '</div>';
 			    infowindow.setContent(content);
 			    infowindow.setPosition(new google.maps.LatLng(d.lat, d.lon));
 			    infowindow.open(map);
+				jQuery('.popup-output').parent().css('overflow','hidden');
 			    				    
 		    });
 
