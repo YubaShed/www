@@ -620,6 +620,8 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 
 	if(!isset($context['sandbox']['parameters'])) {
 
+
+	 
 		// get station ids for each stationcat
 		$q = 'SELECT field_data_field_id.entity_id as site_nid, field_data_field_stationcat.field_stationcat_value as stationcat, field_data_field_id.field_id_value as siteid
 			 						FROM field_data_field_id, field_data_field_stationcat, field_data_field_ref_organization 
@@ -1080,8 +1082,10 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				//var_dump($autogen);
 				// replace or make the data node
 				$data = null;
-
- 				$tag = "time_{$region}_{$parameter}";
+			    $org_nid = $autogen->field_ref_organization[$lang][0]['nid'];
+			    $orgname = $autogen->field_ref_organization[$lang][0]['node']->title;
+			
+ 				$tag = "time_{$orgname}_{$region}_{$parameter}";
 				$val = $tag;
 				$data_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_data' and field_id_value = :param", array(':param' => $val))->fetchField();
 				//echo "data_nid: {$data_nid} <br/>";
@@ -1120,17 +1124,17 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				$data->field_ref_background = $autogen->field_ref_background;
 				$data->field_ref_organization = $autogen->field_ref_organization;
 				
-				// parse autogen's param config and include any configs for this data type
-				$chartConfigs = $autogen->field_param_config[$lang][0]['value'];
-         		$dataTypeConfigs = explode(";", $chartConfigs);
+// 				// parse autogen's param config and include any configs for this data type
+// 				$chartConfigs = $autogen->field_param_config[$lang][0]['value'];
+//          		$dataTypeConfigs = explode(";", $chartConfigs);
          		
-         		foreach($dataTypeConfigs as $dtc){
-         		 $pcfgs = explode("|", trim($dtc));
-         		 if(trim($pcfgs[0]) == $parameter){
-         		  $data->field_param_config[$lang][0]['value'] = trim($pcfgs[1]) . " | " . trim($pcfgs[2]) . " ; ";
-         		  //echo "newconfig: " . trim($pcfgs[1]) . " | " . trim($pcfgs[2]);
-         		 }
-         		}
+//          		foreach($dataTypeConfigs as $dtc){
+//          		 $pcfgs = explode("|", trim($dtc));
+//          		 if(trim($pcfgs[0]) == $parameter){
+//          		  $data->field_param_config[$lang][0]['value'] = trim($pcfgs[1]) . " | " . trim($pcfgs[2]) . " ; ";
+//          		  //echo "newconfig: " . trim($pcfgs[1]) . " | " . trim($pcfgs[2]);
+//          		 }
+//          		}
 				
 
 				// 			$data->field_ref_category[$lang][0]['nid'] = $autogen->field_ref_category[$lang][0]['nid'];
@@ -1260,7 +1264,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				// generate the csv chart summary table
 				$dir = "public://tables/";
 				file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-				$tag = "time_{$region}_{$parameter}";
+				$tag = "time_{$orgname}_{$region}_{$parameter}";
 				$filename = "{$tag}.csv";
 				$file = file_save_data($str, $dir . $filename,FILE_EXISTS_REPLACE );
 				//image_path_flush($dir . $filename);
@@ -1339,6 +1343,21 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 					'title' => t(' Data Records based on Autogen Source Data'),
 		)
 		);
+	}
+	
+	/* misc function to delete a bunch of nodes
+	 * 
+	 */
+	function watershed_deletenodes(){
+// 	       // select all nodes with a field_id like "time_%", node_load them, and delete them
+// 	       $q = 'select entity_id as nid
+// 	       FROM field_data_field_id
+// 	       WHERE field_id_value LIKE "time_%"; ';
+// 	       $results = db_query($q);
+// 	       foreach($results as $result){
+// 	        echo "deleting " . $result->nid;
+// 	        node_delete($result->nid);
+// 	       }
 	}
 
 	// /**
