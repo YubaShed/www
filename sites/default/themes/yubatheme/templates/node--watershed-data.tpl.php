@@ -109,7 +109,7 @@ if(isset($field_data_table[0]['tabledata'])){
  $showChart = true;
  drupal_add_js('http://d3js.org/d3.v2.js','external');
 
- echo '    <div id="charttab" style="width: 100%; height: 410px; "></div>  ';
+ echo '    <div id="charttab" style="width: 100%; min-height:410px;"></div>  ';
 
 
     $libname = 'amcharts';
@@ -373,7 +373,14 @@ AmCharts.ready(function () {
     chart.addChartCursor(chartCursor);
 
     // WRITE
-    chart.write("charttab");
+	chart.write("charttab");
+	
+	// ADD INSTRUCTIONAL TIPS
+	var zoomtip = '<p class="charttip">Click and drag on chart to zoom.</p>';
+	var patchtip = '<p class="charttip">Click a site&#8217;s color patch to remove its data from the chart.</p>';
+	jQuery('#charttab').prepend(zoomtip);
+	jQuery('#charttab').append(patchtip);
+	
     //chart.write("chartdiv");
 
  // Bind our overlay to the map…

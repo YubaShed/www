@@ -38,3 +38,8 @@ svg.legend {
 .page-viewdata.page-viewdata-sites .panel-col-last {
 	width: 74%;
 }
+
+.charttip {
+	font-size: .8em;
+	font-style: italic;
+}
