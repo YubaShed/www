@@ -5,11 +5,5 @@ sites/*/settings*.php
 sites/*/files
 sites/*/private
 
-logs*
-
 *~
-.htaccess*
-
-*/.DS_Store
-
-.settings*
+.htaccess
