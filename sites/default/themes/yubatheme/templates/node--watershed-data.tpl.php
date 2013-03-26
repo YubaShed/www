@@ -409,8 +409,8 @@ AmCharts.ready(function () {
 
       $orgnid = $field_ref_organization[0]['nid'];
       
-	  $q = 'SELECT node.nid as nid, field_id_value as siteid, node.title as title, field_location_lat as lat, field_location_lon as lon
-	  FROM node, field_data_field_id, field_data_field_location, field_data_field_ref_organization 
+	  $q = 'SELECT node.nid as nid, field_id_value as siteid, node.title as title, field_location_lat as lat, field_location_lon as lon, field_map_popup_value as popup
+	  FROM field_data_field_id, field_data_field_location, field_data_field_ref_organization, node left join field_data_field_map_popup on node.nid = field_data_field_map_popup.entity_id
 	  WHERE node.nid = field_data_field_location.entity_id 
 	  AND node.nid = field_data_field_ref_organization.entity_id
 	  AND node.nid = field_data_field_id.entity_id
@@ -435,7 +435,9 @@ AmCharts.ready(function () {
 	  
 	  foreach($results as $result) {
 	   
-	   echo "        {nid: {$result->nid}, siteid: {$result->siteid}, title: '" .htmlentities(ltrim($result->title, "0"), ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, url: '" . 
+	  		$popup = check_markup($result->popup, 'full_html');
+			$cleanpopup = json_encode($popup);
+			echo "        {nid: {$result->nid}, siteid: {$result->siteid}, title: '" .htmlentities(ltrim($result->title, "0"), ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, popup: '{$cleanpopup}', url: '" . 
 	   url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
 	   . "'},\n";
 	   
@@ -518,9 +520,8 @@ overlay.onAdd = function() {
 		        return siteColors[siteName];
 		        })
 	        .on("mouseover", function(d) { 
-		        // show text
-		        //console.log("circle:hover");
-			    var content = '<a href="' + d.url + '">' + d.title + '</a>' ;
+				var photo = d.popup.substr(5, d.popup.length - 8);
+			    var content = '<div class="popup-output"><a href="' + d.url + '">' + d.title + '</a><br />' + photo + '</div>';
 			    infowindow.setContent(content);
 			    infowindow.setPosition(new google.maps.LatLng(d.lat, d.lon));
 			    infowindow.open(map);
