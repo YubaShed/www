@@ -1644,3 +1644,13 @@ div.admin-panel .description {
 #footer-wrapper .poll .bar .foreground {
   background-color: #ddd;
 }
+
+a[href^="http://"] {
+    background: url('/sites/default/themes/yubatheme/images/external.png') center right no-repeat;
+    padding-right: 13px;
+}
+
+a[href^="http://www.yubashed.org"], a[href^="http://yubashed.org"]  {
+    background: none;
+    padding-right: 0;
+}
