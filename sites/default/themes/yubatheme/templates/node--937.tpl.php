@@ -241,7 +241,10 @@ overlay.onAdd = function() {
 
 };
 
-// Bind our overlay to the map…
+var subbasins = new google.maps.KmlLayer('http://dev.yubashed.org/sites/default/files/subwatersheds-symbolized.kmz');
+
+// Bind our overlays to the map
+subbasins.setMap(map);
 overlay.setMap(map);
     </script>
     
