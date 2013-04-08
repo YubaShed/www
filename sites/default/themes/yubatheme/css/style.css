@@ -1645,12 +1645,12 @@ div.admin-panel .description {
   background-color: #ddd;
 }
 
-a[href^="http://"], a.hideExternalIcon {
+a[href^="http://"] {
     background: url('/sites/default/themes/yubatheme/images/external.png') center right no-repeat;
     padding-right: 13px;
 }
 
-a[href^="http://www.yubashed.org"], a[href^="http://yubashed.org"]  {
+a[href^="http://www.yubashed.org"], a[href^="http://yubashed.org"], a.hideExternalIcon  {
     background: none;
     padding-right: 0;
 }
