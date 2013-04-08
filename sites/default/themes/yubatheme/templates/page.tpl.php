@@ -244,3 +244,18 @@
   </div></div> <!-- /.section, /#footer-wrapper -->
 
 </div></div> <!-- /#page, /#page-wrapper -->
+
+<script type="text/javascript">
+jQuery(document).ready(function() {
+	/** Hide external link icon from anchor composed entirely of images because it looks funny **/
+	jQuery('a[href^="http://"]').each( function() {
+		var html = jQuery(this).html();
+		var imgStart = html.indexOf('<img');
+		if (imgStart > -1) {
+			var imgEnd = html.indexOf('>', imgStart);
+			if ( (imgEnd - imgStart - 1) >= (html.length) )
+				jQuery(this).addClass('hideExternalIcon');
+		}
+	});
+});
+</script>

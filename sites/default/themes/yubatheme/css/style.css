@@ -1645,7 +1645,7 @@ div.admin-panel .description {
   background-color: #ddd;
 }
 
-a[href^="http://"] {
+a[href^="http://"], a.hideExternalIcon {
     background: url('/sites/default/themes/yubatheme/images/external.png') center right no-repeat;
     padding-right: 13px;
 }
