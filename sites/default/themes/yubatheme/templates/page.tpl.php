@@ -253,7 +253,7 @@ jQuery(document).ready(function() {
 		var imgStart = html.indexOf('<img');
 		if (imgStart > -1) {
 			var imgEnd = html.indexOf('>', imgStart);
-			if ( (imgEnd - imgStart - 1) >= (html.length) )
+			if ( (imgEnd - imgStart) >= (html.length - 1) )
 				jQuery(this).addClass('hideExternalIcon');
 		}
 	});
