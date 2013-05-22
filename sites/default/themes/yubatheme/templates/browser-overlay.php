@@ -1,5 +1,35 @@
-<?php if (!isset ($_COOKIE["Dismiss"])) { setcookie("Dismiss","0"); } if ($_COOKIE["Dismiss"] == "0"): ?>
+<?php if ( isset($_COOKIE["Dismiss"]) ) { if ($_COOKIE["Dismiss"] == "0"): ?>
 
+	<script type="text/javascript">
+    
+		function getCookie(c_name) {
+			var c_value = document.cookie;
+			var c_start = c_value.indexOf(" " + c_name + "=");
+			if (c_start == -1) {
+				c_start = c_value.indexOf(c_name + "=");
+			} 
+			if (c_start == -1) {
+				c_value = null;
+			} else	{
+				c_start = c_value.indexOf("=", c_start) + 1;
+				var c_end = c_value.indexOf(";", c_start);
+				if (c_end == -1) {
+					c_end = c_value.length;
+				}
+				c_value = unescape(c_value.substring(c_start,c_end));
+			}
+			return c_value;
+		}
+			
+		function setCookie(c_name,value,exdays) {
+			var exdate=new Date();
+			exdate.setDate(exdate.getDate() + exdays);
+			var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+			document.cookie=c_name + "=" + c_value;
+		}
+    
+    </script>
+    
 	<div id="browser-alert-wrapper" style="position: fixed;
 	_position:absolute;
 	top: 0;
@@ -60,8 +90,8 @@
                     </a>
                  </div>            
             </div>
-            <form id="dismiss" method="post" action"setcookie.php" style="text-align:right;"><input type="submit" value="Dismiss" /></form>
+            <p id="dismiss" style="text-align: right;"><a href="#" style="padding:10px; border: 1px solid #333; background-color: #aaa;" onClick="setCookie('Dismiss','1'); jQuery('#browser-alert-wrapper').css('display', 'none'); return false;">Dismiss</a>
     	</div>
     </div> 
     
-<?php endif; ?>
+<?php endif; } ?>
