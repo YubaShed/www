@@ -1,4 +1,4 @@
-<?php if (!isset ($_COOKIE["Dismiss"])): ?>
+<?php echo $_COOKIE["DISMISS"]; if (!isset ($_COOKIE["Dismiss"])): ?>
 
 	<div id="browser-alert-wrapper" style="position: fixed;
 	_position:absolute;
