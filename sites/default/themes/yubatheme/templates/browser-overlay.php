@@ -1,4 +1,14 @@
-	<div id="browser-alert-wrapper">
+	<div id="browser-alert-wrapper" style="position: fixed;
+	_position:absolute;
+	top: 0;
+ 	_top:expression(eval(document.body.scrollTop));
+  	left: 0;
+	width: 100%;
+	background-color: black;
+	opacity: .75;
+	filter:alpha(opacity=75);
+	color: white;
+	z-index: 9999;">
     	<div id="browser-alert">
             <h2>Your browser is out of date.</h2>
             <p>Many functions of this site&#8212particularly maps&#8212;do not work well or at all in your browser. Click one of the icons below if you would like to upgrade to a compatible browser:</p>
