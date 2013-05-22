@@ -98,12 +98,13 @@ drupal_add_css('sites/default/themes/yubatheme/yubatheme.css','file');
 $showMap = false;
 $showChart = false;
 
-if(count($field_stationcat) > 0) {
+/* Stationcat no longer a prerequisite for map display */
+//if(count($field_stationcat) > 0) {
  $showMap = true;
  drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
 
  echo '    <div id="maptab" style="width: 100%; height: 340px;"></div><br/> ';
-}
+//}
 
 if(isset($field_data_table[0]['tabledata'])){
  $showChart = true;
