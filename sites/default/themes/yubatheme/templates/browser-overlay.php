@@ -1,4 +1,4 @@
-<?php if (!isset ($_COOKIE["Dismiss"]) ) { ?>
+<?php if (isset ($_COOKIE["Dismiss"])) { echo "dismissed!"; } else { ?>
 
 	<div id="browser-alert-wrapper" style="position: fixed;
 	_position:absolute;
@@ -60,7 +60,7 @@
                     </a>
                  </div>            
             </div>
-            <form id="dismiss" method="get" action"setcookie.php" style="text-align:right;"><input type="submit" value="Dismiss" /></form>
+            <form id="dismiss" method="post" action"setcookie.php" style="text-align:right;"><input type="submit" value="Dismiss" /></form>
     	</div>
     </div> 
     
