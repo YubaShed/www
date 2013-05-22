@@ -90,7 +90,6 @@
 		{
 			// if IE<=8
 			include ( 'browser-overlay.php' );
-			exit;
 		} ?>
 
   <div id="header" class="<?php print $secondary_menu ? 'with-secondary-menu': 'without-secondary-menu'; ?>"><div class="section clearfix">

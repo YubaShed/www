@@ -46,8 +46,10 @@ svg.legend {
 
 #browser-alert-wrapper {
 	position: fixed;
+	_position:absolute;
 	top: 0;
-	left: 0;
+ 	_top:expression(eval(document.body.scrollTop));
+  	left: 0;
 	width: 100%;
 	background-color: black;
 	opacity: .75;
