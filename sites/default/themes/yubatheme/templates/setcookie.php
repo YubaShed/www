@@ -1,0 +1,1 @@
+<?php setcookie("Dismiss"); ?>

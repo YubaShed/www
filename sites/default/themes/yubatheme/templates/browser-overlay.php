@@ -1,3 +1,5 @@
+<?php if (!$_COOKIE["Dismiss"]) { ?>
+
 	<div id="browser-alert-wrapper" style="position: fixed;
 	_position:absolute;
 	top: 0;
@@ -58,6 +60,8 @@
                     </a>
                  </div>            
             </div>
-            <p id="dismiss" style="text-align:right;"><a href="#">Dismiss</a></p>
+            <form id="dismiss" method="get" action"setcookie.php" style="text-align:right;"><input type="submit" value="Dismiss" /></form>
     	</div>
     </div> 
+    
+<?php } ?>
