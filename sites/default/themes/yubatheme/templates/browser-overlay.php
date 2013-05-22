@@ -5,19 +5,19 @@
             <div id="browser-options">
             	<div id="ie9">
                 	<a href="http://windows.microsoft.com/en-us/internet-explorer/downloads/ie-9/worldwide-languages" target="_blank">
-	                	<img src="/sites/default/themes/yubatheme/images/browser-icons/ie9.svg" width="100" height="100" alt="IE 9 icon" /><br />
+	                	<img src="/sites/default/themes/yubatheme/images/browser-icons/ie9.png" width="100" height="100" alt="IE 9 icon" /><br />
                         Internet Explorer 9
                     </a>
                  </div>
             	<div id="ie10">
                 	<a href="http://windows.microsoft.com/en-us/internet-explorer/ie-10-worldwide-languages" target="_blank">
-	                	<img src="/sites/default/themes/yubatheme/images/browser-icons/ie10.svg" width="100" height="100" alt="IE 10 icon" /><br />
+	                	<img src="/sites/default/themes/yubatheme/images/browser-icons/ie10.png" width="100" height="100" alt="IE 10 icon" /><br />
                         Internet Explorer 10
                     </a>
                  </div>
             	<div id="firefox">
                 	<a href="http://firefox.com/" target="_blank">
-	                	<img src="/sites/default/themes/yubatheme/images/browser-icons/firefox.svg" width="100" height="100" alt="Firefox icon" /><br />
+	                	<img src="/sites/default/themes/yubatheme/images/browser-icons/firefox.png" width="100" height="100" alt="Firefox icon" /><br />
                         Firefox
                     </a>
                  </div>
