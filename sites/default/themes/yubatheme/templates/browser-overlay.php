@@ -1,4 +1,4 @@
-<?php if (isset ($_COOKIE["Dismiss"])) { echo "dismissed!"; } else { ?>
+<?php if (!isset ($_COOKIE["Dismiss"])): ?>
 
 	<div id="browser-alert-wrapper" style="position: fixed;
 	_position:absolute;
@@ -64,4 +64,4 @@
     	</div>
     </div> 
     
-<?php } ?>
+<?php endif; ?>
