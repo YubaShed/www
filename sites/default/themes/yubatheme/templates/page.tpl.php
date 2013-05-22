@@ -89,7 +89,7 @@
 	<?php if(preg_match('/(?i)msie [2-8]/',$_SERVER['HTTP_USER_AGENT']))
 		{
 			// if IE<=8
-			include ( 'browser-overlay.php' );
+			include_once ( 'browser-overlay.php' );
 		} ?>
 
   <div id="header" class="<?php print $secondary_menu ? 'with-secondary-menu': 'without-secondary-menu'; ?>"><div class="section clearfix">
