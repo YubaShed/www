@@ -100,13 +100,12 @@ $showChart = false;
 
 /* Stationcat no longer a prerequisite for map display */
 //if(count($field_stationcat) > 0) {
- $showMap = true;
- drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
-
- echo '    <div id="maptab" style="width: 100%; height: 340px;"></div><br/> ';
 //}
 
 if(isset($field_data_table[0]['tabledata'])){
+ $showMap = true;
+ drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
+ echo '    <div id="maptab" style="width: 100%; height: 340px;"></div><br/> ';
  $showChart = true;
  drupal_add_js('http://d3js.org/d3.v2.js','external');
 
