@@ -23,6 +23,7 @@ function google_map_field_help($path, $arg) {
  * Implements hook_init().
  */
 function google_map_field_init() {
+  google_map_field_add_maps_api();
   drupal_add_js(drupal_get_path('module', 'google_map_field') . '/js/google_map_field_node_display.js', 'file');
 }
 
@@ -117,7 +118,7 @@ function google_map_field_field_formatter_view($object_type, $object, $field, $i
   $element = array();
 
   // include the google maps api.
-  google_map_field_add_maps_api();
+  //google_map_field_add_maps_api();
 
   switch ($display['type']) {
     case 'google_map_field_formatter_wkt':
@@ -179,7 +180,7 @@ function google_map_field_format_field($item, $delta, $display) {
 function google_map_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
 
   // include the google maps api.
-  google_map_field_add_maps_api();
+  //google_map_field_add_maps_api();
 
   $fname = str_replace('_', '-', $element['#field_name']);
   $element['#title'] = t('Google Map Field Settings');
@@ -320,12 +321,12 @@ function google_map_field_add_maps_api() {
   if (variable_get('google_map_field_apikey', '') != '') {
     $element = array(
       '#type' => 'markup',
-      '#markup' => '<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false&key=' . variable_get('google_map_field_apikey', '') . '"></script>',
+      '#markup' => '<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false&key=' . variable_get('google_map_field_apikey', '') . '"></script>',
     );
     drupal_add_html_head($element, 'google_maps_api');
   }
   else {
-    drupal_add_js('http://maps.googleapis.com/maps/api/js?sensor=false', 'external');
+    drupal_add_js('//maps.googleapis.com/maps/api/js?sensor=false', 'external');
   }
 }
 

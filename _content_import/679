@@ -1,0 +1,138 @@
+array(
+  (object) array(
+      'vid' => '687',
+      'uid' => '42',
+      'title' => 'WQ Field: Turbidity SYRCL LYT 2004-2011',
+      'log' => '',
+      'status' => '1',
+      'comment' => '1',
+      'promote' => '0',
+      'sticky' => '0',
+      'vuuid' => '753867a3-b436-40a9-b739-daa245b85829',
+      'nid' => '679',
+      'type' => 'watershed_data',
+      'language' => 'und',
+      'created' => '1331159365',
+      'changed' => '1331159365',
+      'tnid' => '0',
+      'translate' => '0',
+      'uuid' => '32f3b2ee-56ed-4262-812e-410c650ff1e8',
+      'revision_timestamp' => '1331159365',
+      'revision_uid' => '43',
+      'body' => array(),
+      'field_ref_region' => array(
+        'und' => array(
+          array(
+            'nid' => '99',
+          ),
+        ),
+      ),
+      'field_ref_category' => array(
+        'und' => array(
+          array(
+            'nid' => '9',
+          ),
+        ),
+      ),
+      'field_ref_organization' => array(
+        'und' => array(
+          array(
+            'nid' => '14',
+          ),
+        ),
+      ),
+      'field_ref_site' => array(),
+      'field_ref_metadata' => array(
+        'und' => array(
+          array(
+            'nid' => '48',
+          ),
+        ),
+      ),
+      'field_ref_background' => array(
+        'und' => array(
+          array(
+            'nid' => '629',
+          ),
+        ),
+      ),
+      'field_id' => array(
+        'und' => array(
+          array(
+            'value' => 'time_LYT_H2O_Turbidity',
+            'format' => NULL,
+            'safe_value' => 'time_LYT_H2O_Turbidity',
+          ),
+        ),
+      ),
+      'field_php_code' => array(),
+      'field_ref_param' => array(
+        'und' => array(
+          array(
+            'nid' => '36',
+          ),
+        ),
+      ),
+      'field_extra_title' => array(
+        'und' => array(
+          array(
+            'value' => 'Time Series',
+            'format' => NULL,
+            'safe_value' => 'Time Series',
+          ),
+        ),
+      ),
+      'field_chart' => array(
+        'und' => array(
+          array(
+            'fid' => '223',
+            'title' => NULL,
+            'data' => NULL,
+          ),
+        ),
+      ),
+      'field_file' => array(
+        'und' => array(
+          array(
+            'fid' => '183',
+            'title' => NULL,
+            'data' => NULL,
+          ),
+        ),
+      ),
+      'field_tag_start_year' => array(
+        'und' => array(
+          array(
+            'tid' => '802',
+          ),
+        ),
+      ),
+      'field_tag_end_year' => array(
+        'und' => array(
+          array(
+            'tid' => '772',
+          ),
+        ),
+      ),
+      'field_chart_caption' => array(),
+      'field_chart_data_file' => array(),
+      'field_data_table' => array(),
+      'field_stationcat' => array(),
+      'cid' => '0',
+      'last_comment_timestamp' => '1330534328',
+      'last_comment_name' => NULL,
+      'last_comment_uid' => '42',
+      'comment_count' => '0',
+      'name' => 'syrcl',
+      'picture' => '0',
+      'data' => 'a:10:{s:7:"contact";i:1;s:19:"biblio_show_profile";i:0;s:19:"biblio_my_pubs_menu";i:0;s:21:"biblio_contributor_id";s:1:"0";s:22:"biblio_id_change_count";s:1:"0";s:17:"biblio_user_style";s:6:"system";s:18:"biblio_baseopenurl";s:0:"";s:18:"biblio_openurl_sid";s:0:"";s:19:"biblio_crossref_pid";s:0:"";s:7:"overlay";i:1;}',
+      'path' => array(
+        'pid' => '1481',
+        'source' => 'node/679',
+        'alias' => 'viewdata/data/wq-field-turbidity-syrcl-lyt-2004-2011',
+        'language' => 'und',
+      ),
+      'menu' => NULL,
+      'node_export_drupal_version' => '7',
+    ),
+)

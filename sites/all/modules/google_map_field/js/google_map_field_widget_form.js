@@ -32,6 +32,7 @@ var google_map_field_map;
       google_map_field_map = new google.maps.Map(document.getElementById("google_map_picker"), mapOptions);
       marker = new google.maps.Marker({
         position: latlng,
+        optimized: false,
         map: google_map_field_map
       });
       // Add a click listener to the map.
