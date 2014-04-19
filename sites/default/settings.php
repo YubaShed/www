@@ -205,7 +205,7 @@ $databases = array (
   array (
     'default' => 
     array (
-      'database' => '/home/yubashed/dev/db/drupal_sqlite_yuba',
+      'database' => '/home/yubashed/live/db/drupal_sqlite_yuba',
       'driver' => 'sqlite',
          'prefix' => array(
       'default'   => '',
@@ -217,7 +217,7 @@ $databases = array (
 ),),);
 
 $databases['import']['import'] = array (
-  'database' => '/home/yubashed/dev/db/yubashed_import',
+  'database' => '/home/yubashed/live/db/yubashed_import',
     'driver' => 'sqlite',
       'prefix' => '',
       );
