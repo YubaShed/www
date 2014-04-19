@@ -114,17 +114,17 @@
                  
 <?php 
 
-	$q = 'select field_data_field_ais_location.entity_id as nid, node.title as title, field_ais_location_lat as lat, field_ais_location_lon as lon from field_data_field_ais_location join node on node.nid = field_data_field_ais_location.entity_id;';
-	  
+	$q = 'select field_data_field_ais_location.entity_id as nid, node.title as title, field_ais_location_lat as lat, field_ais_location_lon as lon, field_data_field_species_observed.field_species_observed_value as species from field_data_field_ais_location inner join node on field_data_field_ais_location.entity_id = node.nid left outer join field_data_field_species_observed on field_data_field_species_observed.entity_id = node.nid;';
 	$results = db_query($q);
 	  
 	foreach($results as $result) {
 	   
 	   //$popup = check_markup($result->title, 'full_html');
 	   //$cleanpopup = json_encode($popup);
-	   echo "{nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, popup: '{}', url: '" . 
+	   echo "{nid: {$result->nid}, title: '" .htmlentities($result->title, ENT_QUOTES) ."', lat: {$result->lat}, lon: {$result->lon}, species: '{$result->species}' , popup: '{}', url: '" . 
 	   url(drupal_get_path_alias('node/' . $result->nid), array('absolute' => TRUE))
 	   . "'},\n";
+	   
 	}
  
 
@@ -136,12 +136,12 @@
 				
 				//]]>
 
-var stationcats = [];
+var species = [];
 for (i=0; i < sites.length; i++) {
-	if (jQuery.inArray(sites[i].stationcat, stationcats) == -1)
-		stationcats[i] = sites[i].stationcat;
+	if (jQuery.inArray(sites[i].species, species) == -1)
+		species[i] = sites[i].species;
 }
-console.log(stationcats.length);
+console.log("species.length: " + species.length);
 
 //var siteColors = ["#FF6600", "#FCD202", "#B0DE09", "#0D8ECF", "#2A0CD0", "#CD0D74", "#CC0000", "#00CC00", "#0000CC", "#DDDDDD", "#999999", "#333333", "#990000"];
 colorComponents=new Array('00','CC','33','66','99','FF');
@@ -159,7 +159,8 @@ for(i=0;i<6;i++){
 console.log(siteColors);
 
 
-// Create the Google MapÉ
+// Create the Google Map
+
 var map = new google.maps.Map(d3.select("#maptab").node(), {
   zoom: 10,
   center: new google.maps.LatLng(39.438459, -120.812336),
@@ -207,15 +208,15 @@ overlay.onAdd = function() {
 	        .attr("cy", padding)
 	        .attr("id", function(d) { return "circle_" + d.nid})
 	        .attr("fill", function(d) { 
-		        var stationcatIndex = jQuery.inArray(d.stationcat, stationcats);
-				return siteColors[stationcatIndex];
+		        var speciesIndex = jQuery.inArray(d.species, species);
+				return siteColors[speciesIndex];
 //				var colorSelector = parseInt(stationcatIndex * siteColors.length / sites.length);
 //				console.log(d.stationcat + '(' + stationcatIndex + '): ' + colorSelector);
 //		        return siteColors[colorSelector];
 		        })
 	        .attr("stroke", function(d) { 
-		        var stationcatIndex = jQuery.inArray(d.stationcat, stationcats);
-				return siteColors[stationcatIndex];
+		        var speciesIndex = jQuery.inArray(d.species, species);
+				return siteColors[speciesIndex];
 		     })
 		    .on("mouseover", function(d) { 
 				var photo = d.popup.substr(5, d.popup.length - 8);
@@ -235,10 +236,7 @@ overlay.onAdd = function() {
 	          .style("left", (d.x - padding) + "px")
 	          .style("top", (d.y - padding) + "px");
 	    }
-			  
 	  };
-	  
-
 };
 
 var subbasins = new google.maps.KmlLayer('http://dev.yubashed.org/sites/default/files/subwatersheds-symbolized.kmz');
@@ -250,10 +248,6 @@ overlay.setMap(map);
     
     
     <!--end watershed_data section-->
-    
-    
-    
-    
     
 
   <?php if ($display_submitted): ?>
@@ -296,3 +290,4 @@ overlay.setMap(map);
   ?>
 
 </div>
+
