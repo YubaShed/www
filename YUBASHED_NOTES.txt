@@ -1,0 +1,12 @@
+scripts to run after checking out a fresh directory from git or copying folders
+/db:
+sudo chown -R yubashed:www-data .
+sudo chmod g+s .
+
+/www:
+sudo chown yubashed:www-data .
+sudo chown -R yubashed:www-data *
+find . -type d -exec sudo chmod g+s {} \;
+
+# sudo nano sites/default/settings.php
+
