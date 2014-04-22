@@ -169,14 +169,6 @@ var map = new google.maps.Map(d3.select("#maptab").node(), {
 });
 
 
-// Zoom and center the map to fit the markers
-var bounds = new google.maps.LatLngBounds();
-for (index in sites) {
-  var data = sites[index];
-  bounds.extend(new google.maps.LatLng(data.lat, data.lon));
-}
-map.fitBounds(bounds);
-
 var overlay = new google.maps.OverlayView();
 var infowindow = new google.maps.InfoWindow({
     content: "",
@@ -240,11 +232,27 @@ overlay.onAdd = function() {
 	  };
 };
 
-var subbasins = new google.maps.KmlLayer('http://dev.yubashed.org/sites/default/files/subwatersheds-symbolized.kmz');
+var subbasins = new google.maps.KmlLayer('http://dev.yubashed.org/sites/default/files/subwatersheds-symbolized.kmz', 
+		{
+                      suppressInfoWindows: true,
+                      map: map,
+                      preserveViewport: true
+                  }
+);
 
 // Bind our overlays to the map
 subbasins.setMap(map);
 overlay.setMap(map);
+
+// Zoom and center the map to fit the markers
+var bounds = new google.maps.LatLngBounds();
+for (index in sites) {
+  var data = sites[index];
+  bounds.extend(new google.maps.LatLng(data.lat, data.lon));
+}
+map.fitBounds(bounds);
+
+
     </script>
     
     
