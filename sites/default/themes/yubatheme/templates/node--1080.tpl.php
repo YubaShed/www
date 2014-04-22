@@ -92,7 +92,7 @@
 
 
 <?php
-	drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
+	//drupal_add_js('http://maps.google.com/maps/api/js?sensor=false','external');
 	drupal_add_js('http://d3js.org/d3.v2.js','external');
 	drupal_add_css('sites/default/themes/yubatheme/yubatheme.css','file');
 ?>
@@ -210,14 +210,14 @@ overlay.onAdd = function() {
 	        .attr("id", function(d) { return "circle_" + d.nid})
 	        .attr("fill", function(d) { 
 		        var speciesIndex = jQuery.inArray(d.species, species);
-				return siteColors[speciesIndex];
+				return siteColors[speciesIndex * 4];
 //				var colorSelector = parseInt(stationcatIndex * siteColors.length / sites.length);
 //				console.log(d.stationcat + '(' + stationcatIndex + '): ' + colorSelector);
 //		        return siteColors[colorSelector];
 		        })
 	        .attr("stroke", function(d) { 
 		        var speciesIndex = jQuery.inArray(d.species, species);
-				return siteColors[speciesIndex];
+				return siteColors[speciesIndex * 4];
 		     })
 		    .on("mouseover", function(d) { 
 				var photo = d.popup.substr(5, d.popup.length - 8);
