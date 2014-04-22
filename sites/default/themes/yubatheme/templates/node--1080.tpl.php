@@ -114,7 +114,7 @@
                  
 <?php 
 
-	$q = 'select field_data_field_ais_location.entity_id as nid, node.title as title, field_ais_location_lat as lat, field_ais_location_lon as lon, field_data_field_species_observed.field_species_observed_value as species from field_data_field_ais_location inner join node on field_data_field_ais_location.entity_id = node.nid left outer join field_data_field_species_observed on field_data_field_species_observed.entity_id = node.nid;';
+	$q = 'select field_data_field_ais_location.entity_id as nid, node.title as title, field_ais_location_lat as lat, field_ais_location_lon as lon, field_data_field_species_observed.field_species_observed_value as species, field_data_field_conservation_status.field_conservation_status_value as status from field_data_field_ais_location inner join node on field_data_field_ais_location.entity_id = node.nid left outer join field_data_field_species_observed on field_data_field_species_observed.entity_id = node.nid left outer join field_data_field_conservation_status on field_data_field_conservation_status.entity_id = node.nid where field_data_field_conservation_status.field_conservation_status_value = "Invasive";';
 	$results = db_query($q);
 	  
 	foreach($results as $result) {
@@ -137,9 +137,10 @@
 				//]]>
 
 var species = [];
+var speciesIndex = 0;
 for (i=0; i < sites.length; i++) {
 	if (jQuery.inArray(sites[i].species, species) == -1)
-		species[i] = sites[i].species;
+		species[speciesIndex++] = sites[i].species;
 }
 console.log("species.length: " + species.length);
 
