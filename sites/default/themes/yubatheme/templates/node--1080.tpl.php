@@ -232,7 +232,7 @@ overlay.onAdd = function() {
 	  };
 };
 
-var subbasins = new google.maps.KmlLayer('http://dev.yubashed.org/sites/default/files/subwatersheds-symbolized.kmz', 
+var subbasins = new google.maps.KmlLayer((location.protocol || 'http:') + '//' + (location.hostname || 'localhost') + '/sites/default/files/subwatersheds-symbolized.kmz', 
 		{
                       suppressInfoWindows: true,
                       map: map,
