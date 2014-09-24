@@ -236,11 +236,11 @@ function watershed_test_form($form, &$form_state) {
 // 	}
 // }
 
-function _random_color(){
-	return _random_hex() . _random_hex() . _random_hex();
+function watershed_random_color(){
+	return watershed_random_hex() . watershed_random_hex() . watershed_random_hex();
 }
 
-function _random_hex(){
+function watershed_random_hex(){
 	return str_pad(strtoupper(dechex(rand(15,240))), 2, '0', STR_PAD_LEFT);
 }
 function _embed($contents, $mime) {
@@ -256,6 +256,8 @@ function watershed_test_form_validate($form, &$form_state){
 		//print_r($autogen->field_param_config['und'][0]['value']);
 		// parse autogen's param config and include any configs for this data type
 		//$parameter = "H2O DO";
+
+
 
 		
 
@@ -1084,8 +1086,10 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				$data = null;
 			    $org_nid = $autogen->field_ref_organization[$lang][0]['nid'];
 			    $orgname = $autogen->field_ref_organization[$lang][0]['node']->title;
+
 			
  				$tag = "time_{$orgname}_{$region}_{$parameter}";
+
 				$val = $tag;
 				$data_nid = db_query("select entity_id from {field_data_field_id} where bundle = 'watershed_data' and field_id_value = :param", array(':param' => $val))->fetchField();
 				//echo "data_nid: {$data_nid} <br/>";
@@ -1125,6 +1129,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 				$data->field_ref_organization = $autogen->field_ref_organization;
 				
 // 				// parse autogen's param config and include any configs for this data type
+
 // 				$chartConfigs = $autogen->field_param_config[$lang][0]['value'];
 //          		$dataTypeConfigs = explode(";", $chartConfigs);
          		
@@ -1135,6 +1140,7 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 //          		  //echo "newconfig: " . trim($pcfgs[1]) . " | " . trim($pcfgs[2]);
 //          		 }
 //          		}
+
 				
 
 				// 			$data->field_ref_category[$lang][0]['nid'] = $autogen->field_ref_category[$lang][0]['nid'];
@@ -1350,14 +1356,23 @@ function autogen_line_param_regionsites_alltime($autogen, &$context) {
 	 */
 	function watershed_deletenodes(){
 // 	       // select all nodes with a field_id like "time_%", node_load them, and delete them
+
 // 	       $q = 'select entity_id as nid
+
 // 	       FROM field_data_field_id
+
 // 	       WHERE field_id_value LIKE "time_%"; ';
+
 // 	       $results = db_query($q);
+
 // 	       foreach($results as $result){
+
 // 	        echo "deleting " . $result->nid;
+
 // 	        node_delete($result->nid);
+
 // 	       }
+
 	}
 
 	// /**
