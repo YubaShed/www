@@ -104,22 +104,22 @@
 
     var sites = [
                  //{name: "test", nid: 1, lat: 37.76487, lon: -122.41948},
-                 {name: 'Jackson Meadows', lat: 39.50900, lon: -120.55200},
-                 {name: 'Deer Creek near Smartville', lat: 39.22400, lon: -121.26800},
-                 {name: 'Yuba NF below Goodyears Bar', lat: 39.52500, lon: -120.93700},
-                 {name: 'Yuba MF near Jackson Meadows', lat: 39.51100, lon: -120.55400},
-                 {name: 'Yuba SF below Spaulding', lat: 39.31900, lon: -120.65800},
-                 {name: 'Yuba Canyon Ck/Bowman Lk', lat: 39.44000, lon: -120.66100},
-                 {name: 'Yuba River near Smartville', lat: 39.23517, lon: -121.27412},
-                 {name: 'N Yuba R below Goodyears Bar', lat: 39.52489, lon: -120.93800},
-                 {name: 'Yuba River at Jones Bar', lat: 39.29200, lon: -121.10400},
-                 {name: 'Oregon Creek below Log Cabin', lat: 39.44500, lon: -121.05800},
-                 {name: 'Yuba River near Marysville', lat: 39.17572, lon: -121.52496},
-                 {name: 'Englebright-Narrows', lat: 39.23300, lon: -121.26700},
-                 {name: 'N Yuba R below Bullards Bar Dam', lat: 39.39100, lon: -121.14300},
-                 {name: 'N Yuba R above Slate Ck near Strawberry', lat: 39.52470, lon: -121.09060},
-                 {name: 'Middle Yuba River below Our House Dam', lat: 39.41200, lon: -120.99700},
-                 {name: 'Yuba River at Parks Bar Bridge', lat: 39.23060, lon: -121.28170}
+                 {name: 'Jackson Meadows', lat: 39.50900, lon: -120.55200, stationcat: 'MY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Deer Creek near Smartville', lat: 39.22400, lon: -121.26800, stationcat: 'SYT', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Yuba NF below Goodyears Bar', lat: 39.52500, lon: -120.93700, stationcat: 'NY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Yuba MF near Jackson Meadows', lat: 39.51100, lon: -120.55400, stationcat: 'MY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Yuba SF below Spaulding', lat: 39.31900, lon: -120.65800, stationcat: 'SY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Yuba Canyon Ck/Bowman Lk', lat: 39.44000, lon: -120.66100, stationcat: 'SYT', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Yuba River near Smartville', lat: 39.23517, lon: -121.27412, stationcat: 'LY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'N Yuba R below Goodyears Bar', lat: 39.52489, lon: -120.93800, stationcat: 'NY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Yuba River at Jones Bar', lat: 39.29200, lon: -121.10400, stationcat: 'SY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Oregon Creek below Log Cabin', lat: 39.44500, lon: -121.05800, stationcat: 'MYT', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Yuba River near Marysville', lat: 39.17572, lon: -121.52496, stationcat: 'LY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Englebright-Narrows', lat: 39.23300, lon: -121.26700, stationcat: 'LY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'N Yuba R below Bullards Bar Dam', lat: 39.39100, lon: -121.14300, stationcat: 'MS', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'N Yuba R above Slate Ck near Strawberry', lat: 39.52470, lon: -121.09060, stationcat: 'NY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Middle Yuba River below Our House Dam', lat: 39.41200, lon: -120.99700, stationcat: 'MY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'},
+                 {name: 'Yuba River at Parks Bar Bridge', lat: 39.23060, lon: -121.28170, stationcat: 'LY', popup: '<h3>Jackson Meadows</h3><p><strong>Operator:</strong> Nevada County<br /><strong>Elevation:</strong> 6037 ft</p>'}
                 ];
 				
 				//]]>
@@ -202,8 +202,8 @@ overlay.onAdd = function() {
 				return siteColors[stationcatIndex];
 		     })
 		    .on("mouseover", function(d) { 
-				var photo = d.popup.substr(5, d.popup.length - 8);
-			    var content = '<div class="popup-output"><a href="' + d.url + '">' + d.title + '</a><br />' + photo + '</div>';
+				var photo = '';
+			    var content = d['popup'];
 			    infowindow.setContent(content);
 			    infowindow.setPosition(new google.maps.LatLng(d.lat, d.lon));
 			    infowindow.open(map);
